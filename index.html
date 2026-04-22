@@ -7,11 +7,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --main-green: #d4edda;
             --brand-green: #4CAF50;
-            --inactive-gray: rgb(206, 207, 207);
+            --main-green: #d4edda;
+            --inactive-gray: #f1f1f1;
             --text-gray: #8e8e93;
-            --active-black: #000000;
             --danger-red: #ff3b30;
         }
 
@@ -24,112 +23,78 @@
             overflow: hidden;
         }
 
-        /* HEADER & SEARCH */
+        /* HEADER */
         .header { display: flex; align-items: center; padding: 15px; background: white; position: sticky; top: 0; z-index: 100; }
         .brand { flex: 1; font-size: 22px; font-weight: 800; color: var(--brand-green); }
         .search-container { flex: 3; display: flex; align-items: center; background: #f1f1f1; padding: 8px 12px; border-radius: 10px; }
         .search-container input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; margin-left: 8px; }
 
         /* CATEGORIES */
-        .categories-wrapper { position: sticky; top: 60px; background: white; z-index: 99; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+        .categories-wrapper { background: white; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
         .categories-container { display: flex; overflow-x: auto; white-space: nowrap; padding: 0 15px; gap: 10px; scrollbar-width: none; }
-        .categories-container::-webkit-scrollbar { display: none; }
         .category-btn { background: white; border: 1px solid #eee; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
         .category-btn.active { background: var(--main-green); border-color: var(--main-green); }
 
         #main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
 
-        /* PRODUCT CARDS */
+        /* PRODUCT CARDS (AVVALGI USLUB) */
         .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .product-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; text-align: center; }
-        .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+        .product-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 10px; text-align: center; }
+        .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
         .product-name { font-size: 14px; font-weight: 600; min-height: 38px; }
         .product-price { font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 
-        /* MODAL SYSTEM */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;
-        }
-        .custom-modal {
-            background: white; width: 85%; border-radius: 20px; padding: 25px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        /* COUNTER -1 + (AVVALGI USLUB) */
+        .counter-container { display: flex; justify-content: space-between; align-items: center; background: #eee; border-radius: 8px; height: 35px; }
+        .btn-mini { background: none; border: none; font-size: 20px; font-weight: bold; width: 35px; cursor: pointer; }
+        .add-to-cart-btn { width: 100%; background: #eee; border: none; padding: 8px 0; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+        /* MODALS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center; }
+        .custom-modal { background: white; width: 85%; border-radius: 20px; padding: 25px; text-align: center; }
+        .modal-input { width: 90%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; text-align: center; outline: none; }
+        .modal-btns { display: flex; gap: 10px; }
         .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
         .btn-confirm { background: var(--brand-green); color: white; }
         .btn-cancel { background: #f1f1f1; color: black; }
-        .btn-danger { background: var(--danger-red); color: white; }
 
-        /* DETAIL WINDOW */
-        #product-detail { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; overflow-y: auto; }
-        .detail-header { padding: 15px; }
-        .back-btn { background: #f1f1f1; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .detail-img { width: 100%; height: 250px; object-fit: cover; }
-        .detail-info { padding: 20px; }
-        .detail-main-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .green-btn { background-color: var(--brand-green) !important; color: white !important; }
+        /* PROFILE PAGE */
+        #profile-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; }
+        .profile-header { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #f5f5f5; }
+        .profile-list { list-style: none; padding: 0; margin: 0; }
+        .profile-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f5f5f5; }
+        .btn-select-green { background: var(--brand-green); color: white; border: none; padding: 6px 15px; border-radius: 6px; font-size: 12px; font-weight: bold; }
 
-        /* CART & ORDERS */
-        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .clear-cart { cursor: pointer; color: var(--danger-red); display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 600; }
-        .cart-item { display: flex; align-items: center; background: white; padding: 10px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #eee; }
-        .cart-item img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
-        .cart-item-info { flex: 1; padding: 0 15px; }
-        .cart-item-controls { display: flex; justify-content: space-between; align-items: center; background: var(--inactive-gray); padding: 5px 10px; border-radius: 8px; min-width: 80px; }
-
-        .order-card { background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* ORDER CARD */
+        .order-card { background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
 
         /* BOTTOM NAV */
-        .add-to-cart-btn { width: 100%; background: var(--inactive-gray); border: none; padding: 10px 0; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .counter-container { display: flex; width: 100%; justify-content: space-between; align-items: center; background: var(--inactive-gray); border-radius: 8px; height: 38px; }
-        .btn-mini { background: none; border: none; font-size: 18px; font-weight: bold; cursor: pointer; width: 30px; }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-gray); font-size: 10px; position: relative; width: 20%; cursor: pointer; }
-        .nav-item svg { width: 24px; height: 24px; fill: var(--text-gray); margin-bottom: 4px; }
-        .nav-item.active { color: var(--active-black); }
-        .nav-item.active svg { fill: var(--active-black); }
-        .badge { position: absolute; top: -4px; right: 15px; background: var(--danger-red); color: white; font-size: 10px; font-weight: bold; min-width: 16px; height: 16px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid white; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-gray); font-size: 10px; position: relative; }
+        .nav-item.active { color: #000; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 4px; }
+        .badge { position: absolute; top: 10px; right: 20%; background: var(--danger-red); color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid white; }
     </style>
 </head>
 <body>
 
-    <div id="clear-modal" class="modal-overlay">
+    <div id="edit-modal" class="modal-overlay">
         <div class="custom-modal">
-            <h3 style="margin:0">Savatni tozalash</h3>
-            <p>Savatni tozalashni tasdiqlaysizmi?</p>
+            <h3 id="modal-title">Sarlavha</h3>
+            <input type="text" id="modal-field" class="modal-input">
             <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('clear-modal')">Yo'q</button>
-                <button class="modal-btn btn-danger" onclick="confirmClearCart()">Ha</button>
+                <button class="modal-btn btn-cancel" onclick="closeEditModal()">Bekor qilish</button>
+                <button class="modal-btn btn-confirm" onclick="saveEditModal()">Tasdiqlash</button>
             </div>
         </div>
     </div>
 
-    <div id="order-type-modal" class="modal-overlay">
-        <div class="custom-modal">
-            <h3 style="margin:0">Buyurtma berish</h3>
-            <p>Qabul qilib olish turini tanlang:</p>
-            <div class="modal-btns" style="flex-direction: column;">
-                <button class="modal-btn btn-confirm" style="background:#007bff" onclick="handleOrderType('pickup')">Olib ketish</button>
-                <button class="modal-btn btn-confirm" onclick="handleOrderType('delivery')">Yetkazib berish</button>
-                <button class="modal-btn btn-cancel" onclick="closeModal('order-type-modal')">Bekor qilish</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="msg-modal" class="modal-overlay">
-        <div class="custom-modal">
-            <p id="msg-text"></p>
-            <button class="modal-btn btn-confirm" onclick="closeModal('msg-modal')">Tushunarli</button>
-        </div>
-    </div>
+    <div id="msg-modal" class="modal-overlay"><div class="custom-modal"><p id="msg-text"></p><button class="modal-btn btn-confirm" onclick="closeModal('msg-modal')">Tushunarli</button></div></div>
+    <div id="order-type-modal" class="modal-overlay"><div class="custom-modal"><h3>Buyurtma turi</h3><div class="modal-btns" style="flex-direction:column"><button class="modal-btn btn-confirm" onclick="handleOrderType('pickup')">Olib ketish</button><button class="modal-btn btn-confirm" style="background:#007bff" onclick="handleOrderType('delivery')">Yetkazib berish</button></div></div></div>
 
     <header class="header">
         <div class="brand">Bahor</div>
         <div class="search-container">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" placeholder="Ovqat izlash..." oninput="searchProduct()">
         </div>
     </header>
@@ -145,27 +110,23 @@
 
     <div id="main-content"></div>
 
-    <div id="product-detail">
-        <div class="detail-header">
-            <button class="back-btn" onclick="closeDetail()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div id="profile-page">
+        <div class="profile-header">
+            <button class="btn-mini" onclick="closeProfile()"> < </button>
+            <div style="flex:1; text-align:center; font-weight:bold;">Ma'lumotlar</div>
         </div>
-        <img id="detail-img" class="detail-img" src="">
-        <div class="detail-info">
-            <h1 id="detail-name" style="margin:0; font-size: 24px;"></h1>
-            <div class="detail-main-row">
-                <span id="detail-price" style="font-size: 20px; font-weight: 800;"></span>
-                <div id="detail-controls" style="width: 140px;"></div>
-            </div>
-            <div class="detail-desc"><h3 style="margin-top:0">Tavsif</h3><p id="detail-text"></p></div>
-        </div>
+        <ul class="profile-list">
+            <li class="profile-item"><span>Ism</span><span id="p-name">---</span><button class="btn-select-green" onclick="openEdit('name')">Tanlash</button></li>
+            <li class="profile-item"><span>Telefon raqam</span><span id="p-phone">---</span><button class="btn-select-green" onclick="openEdit('phone')">Tanlash</button></li>
+            <li class="profile-item"><span>Tug'ilgan kuni</span><span id="p-dob">---</span><button class="btn-select-green" onclick="openEdit('dob')">Tanlash</button></li>
+        </ul>
     </div>
 
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="changeTab(this, 'Menyu')"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Menyu</span></div>
         <div class="nav-item" onclick="changeTab(this, 'Savat')"><div class="badge" id="cart-badge">0</div><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg><span>Savat</span></div>
         <div class="nav-item" onclick="changeTab(this, 'Buyurtmalar')"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Buyurtmalar</span></div>
-        <div class="nav-item" onclick="changeTab(this, 'Aksiyalar')"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg><span>Aksiyalar</span></div>
-        <div class="nav-item" onclick="changeTab(this, 'Profil')"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
+        <div class="nav-item" onclick="openProfile()"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
     </nav>
 
     <script>
@@ -174,144 +135,210 @@
 
         let cart = {};
         let orders = [];
-        let currentTab = 'Menyu';
         let currentCategory = 'Lavash';
+        let currentEditField = '';
+        let userProfile = { name: '', phone: '', dob: '' };
 
         const allProducts = {
-            'Lavash': [
-                { id: 101, name: "Mol go’shtli lavash", price: 32000, img: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400", desc: "Tovuq go'shti, chips, pomidor va maxsus sous bilan boyitilgan issiq lavash." },
-                { id: 102, name: "Sirli lavash", price: 35000, img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400", desc: "Eritilgan pishloq va mol go'shtining ajoyib uyg'unligi." }
-            ],
-            'Hot-dog': [
-                { id: 201, name: "Klassik hot-dog", price: 15000, img: "https://images.unsplash.com/photo-1541232399669-e347660605af?w=400", desc: "Yumshoq bulochka va mazali sosiska." }
-            ],
-            'Desertlar': [{ id: 301, name: "Muzqaymoq", price: 10000, img: "https://images.unsplash.com/photo-1501443762994-82bd5dabb89a?w=400", desc: "Tabiiy sutdan tayyorlangan muzqaymoq." }],
-            'Ichimliklar': [{ id: 401, name: "Coca-Cola 0.5", price: 8000, img: "https://images.unsplash.com/photo-1622483767028-3f66f34aef97?w=400", desc: "Muzdek tetiklashtiruvchi ichimlik." }]
+            'Lavash': [{ id: 101, name: "Mol go’shtli lavash", price: 32000, img: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400" }],
+            'Hot-dog': [{ id: 201, name: "Klassik hot-dog", price: 15000, img: "https://images.unsplash.com/photo-1541232399669-e347660605af?w=400" }],
+            'Desertlar': [{ id: 301, name: "Muzqaymoq", price: 10000, img: "https://images.unsplash.com/photo-1501443762994-82bd5dabb89a?w=400" }],
+            'Ichimliklar': [{ id: 401, name: "Coca-Cola 0.5", price: 8000, img: "https://images.unsplash.com/photo-1622483767028-3f66f34aef97?w=400" }]
         };
 
-        function renderProducts(products, title = currentCategory) {
+        // RENDER PRODUCTS
+        function renderProducts(list) {
             const container = document.getElementById('main-content');
-            let html = `<h2>${title}</h2><div class="products-grid">`;
-            products.forEach(p => {
+            let html = `<div class="products-grid">`;
+            list.forEach(p => {
                 const qty = cart[p.id] ? cart[p.id].qty : 0;
                 html += `
                     <div class="product-card">
-                        <img src="${p.img}" onclick="openDetail(${p.id})">
+                        <img src="${p.img}">
                         <div class="product-name">${p.name}</div>
                         <div class="product-price">${p.price.toLocaleString()} so'm</div>
-                        <div class="cart-controls">
-                            <button id="btn-${p.id}" class="add-to-cart-btn" style="display: ${qty > 0 ? 'none' : 'block'}" onclick="addToCart(${p.id},'${p.name}',${p.price},'${p.img}')">Savatga</button>
-                            <div id="counter-${p.id}" class="counter-container" style="display: ${qty > 0 ? 'flex' : 'none'}">
-                                <button class="btn-mini" onclick="updateQty(${p.id},-1)">-</button>
-                                <span id="qty-${p.id}">${qty}</span>
-                                <button class="btn-mini" onclick="updateQty(${p.id},1)">+</button>
-                            </div>
+                        <div id="ctrl-${p.id}">
+                            ${qty > 0 ? 
+                                `<div class="counter-container"><button class="btn-mini" onclick="updateQty(${p.id},-1)">-</button><span>${qty}</span><button class="btn-mini" onclick="updateQty(${p.id},1)">+</button></div>` : 
+                                `<button class="add-to-cart-btn" onclick="updateQty(${p.id},1)">Savatga</button>`
+                            }
                         </div>
                     </div>`;
             });
             container.innerHTML = html + `</div>`;
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function showMessage(text) { document.getElementById('msg-text').innerText = text; openModal('msg-modal'); }
+        function updateQty(id, delta) {
+            if (!cart[id]) {
+                let p; for(let c in allProducts) { p = allProducts[c].find(x => x.id === id) || p; }
+                cart[id] = { ...p, qty: 0 };
+            }
+            cart[id].qty += delta;
+            if (cart[id].qty <= 0) delete cart[id];
+            updateBadge();
+            renderProducts(allProducts[currentCategory]);
+        }
 
-        function startClearCart() { openModal('clear-modal'); }
-        function confirmClearCart() { cart = {}; updateBadge(); closeModal('clear-modal'); showCart(); }
+        function updateBadge() {
+            const count = Object.values(cart).reduce((a, b) => a + b.qty, 0);
+            const b = document.getElementById('cart-badge');
+            b.innerText = count; b.style.display = count > 0 ? 'flex' : 'none';
+        }
 
-        function startOrder() { openModal('order-type-modal'); }
+        // PROFILE LOGIC
+        function openProfile() { document.getElementById('profile-page').style.display = 'block'; }
+        function closeProfile() { document.getElementById('profile-page').style.display = 'none'; }
 
+        function openEdit(field) {
+            currentEditField = field;
+            const modal = document.getElementById('edit-modal');
+            const title = document.getElementById('modal-title');
+            const input = document.getElementById('modal-field');
+            input.value = '';
+            
+            if(field === 'name') title.innerText = "Ismni kiriting";
+            if(field === 'phone') { title.innerText = "Telefon raqam"; input.value = "+998 "; }
+            if(field === 'dob') title.innerText = "Tug'ilgan kun (KK/OO/YYYY)";
+
+            modal.style.display = 'flex';
+            input.focus();
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+        // INPUT MASKALAR
+        document.getElementById('modal-field').addEventListener('input', function(e) {
+            if (currentEditField === 'phone') {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,2})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                // 998 + 2 + 3 + 2 + 2
+                let val = "+998 ";
+                if (x[2]) val += x[2] + " ";
+                if (x[3]) val += x[3] + " ";
+                if (x[4]) val += x[4] + " ";
+                if (x[5]) val += x[5];
+                e.target.value = val.trim();
+            }
+            if (currentEditField === 'dob') {
+                let v = e.target.value.replace(/\D/g, '');
+                if (v.length > 8) v = v.substring(0,8);
+                
+                let day = v.substring(0,2);
+                if (parseInt(day) > 31) day = "31";
+                
+                let month = v.substring(2,4);
+                if (parseInt(month) > 12) month = "12";
+                
+                let year = v.substring(4,8);
+                
+                let res = day;
+                if (v.length > 2) res += "/" + month;
+                if (v.length > 4) res += "/" + year;
+                e.target.value = res;
+            }
+        });
+
+        function saveEditModal() {
+            const val = document.getElementById('modal-field').value;
+            if(!val || val === "+998") return;
+
+            if(currentEditField === 'name') { userProfile.name = val; document.getElementById('p-name').innerText = val; }
+            if(currentEditField === 'phone') { userProfile.phone = val; document.getElementById('p-phone').innerText = val; }
+            if(currentEditField === 'dob') { userProfile.dob = val; document.getElementById('p-dob').innerText = val; }
+            
+            closeEditModal();
+        }
+
+        // ORDER LOGIC
         function handleOrderType(type) {
             closeModal('order-type-modal');
-            const now = new Date();
-            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+            if (type === 'delivery') {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        finalizeOrder('Yetkazib berish', `${pos.coords.latitude}, ${pos.coords.longitude}`);
+                    }, () => { finalizeOrder('Yetkazib berish', 'Geolokatsiya rad etildi'); });
+                }
+            } else {
+                finalizeOrder('Olib ketish');
+            }
+        }
 
+        function finalizeOrder(type, loc = "") {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + " " + now.getDate().toString().padStart(2,'0') + "/" + (now.getMonth()+1).toString().padStart(2,'0') + "/" + now.getFullYear();
+            
             const newOrder = {
                 time: timeStr,
                 items: Object.values(cart),
-                total: Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0)
+                total: Object.values(cart).reduce((a,b) => a + (b.price*b.qty), 0),
+                type: type,
+                location: loc
             };
             orders.unshift(newOrder);
-
-            if(type === 'pickup') {
-                showMessage("Mahsulot tayyor bo’lgach, siz bilan aloqaga chiqamiz. Admin tez orada bog’lanadi.");
-            } else {
-                tg.MainButton.setText("MANZILNI YUBORISH").show();
-                showMessage("Manzil qabul qilindi. Kuryer tez orada yo'lga chiqadi.");
-            }
-            cart = {}; updateBadge();
+            cart = {};
+            updateBadge();
+            showMessage("Buyurtmangiz qabul qilindi!");
         }
 
         function showOrders() {
             const container = document.getElementById('main-content');
-            let html = `<h2>Buyurtmalar</h2>`;
-            if (orders.length === 0) {
-                html += `<p style="text-align:center; color:gray; margin-top:50px;">Hali buyurtmalar mavjud emas</p>`;
-            } else {
-                orders.forEach(order => {
-                    html += `<div class="order-card">
-                        <div style="font-size:12px; color:var(--text-gray); border-bottom:1px solid #f5f5f5; padding-bottom:8px; margin-bottom:10px; display:flex; justify-content:space-between;">
-                            <span>Vaqt:</span> <span>${order.time}</span>
-                        </div>`;
-                    order.items.forEach(i => {
-                        html += `<div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px;">
-                            <span>${i.name} (${i.qty} dona)</span><span>${(i.price * i.qty).toLocaleString()} so'm</span></div>`;
-                    });
-                    html += `<div style="border-top:1px dashed #ddd; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:800; font-size:16px;">
-                        <span>Jami summa:</span><span style="color:var(--brand-green);">${order.total.toLocaleString()} so'm</span></div>
-                        <div style="text-align:center; margin-top:15px; font-size:13px; color:var(--brand-green); font-style:italic; font-weight:500;">Xaridingiz uchun rahmat!</div></div>`;
+            let html = "<h2>Buyurtmalar</h2>";
+            orders.forEach(o => {
+                html += `<div class="order-card">
+                    <div style="font-size:12px; color:gray; border-bottom:1px solid #eee; margin-bottom:10px; display:flex; justify-content:space-between">
+                        <span>${o.time}</span><span>${o.type}</span>
+                    </div>`;
+                o.items.forEach(i => {
+                    html += `<div style="display:flex; justify-content:space-between; font-size:14px">
+                        <span>${i.name} x ${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}</span>
+                    </div>`;
                 });
-            }
-            container.innerHTML = html;
+                html += `<div style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px; font-weight:bold; text-align:right">Jami: ${o.total.toLocaleString()} so'm</div>
+                <div style="text-align:center; color:var(--brand-green); font-style:italic; margin-top:10px">Xaridingiz uchun rahmat!</div></div>`;
+            });
+            container.innerHTML = html || "<p style='text-align:center; color:gray'>Buyurtmalar yo'q</p>";
         }
-
-        function openDetail(id) {
-            let p; for(let c in allProducts) { p = allProducts[c].find(i => i.id === id) || p; }
-            document.getElementById('detail-img').src = p.img;
-            document.getElementById('detail-name').innerText = p.name;
-            document.getElementById('detail-price').innerText = p.price.toLocaleString() + " so'm";
-            document.getElementById('detail-text').innerText = p.desc;
-            updateDetailControls(p);
-            document.getElementById('product-detail').style.display = 'block';
-        }
-
-        function updateDetailControls(p) {
-            const q = cart[p.id] ? cart[p.id].qty : 0;
-            const c = document.getElementById('detail-controls');
-            if(q > 0) {
-                c.innerHTML = `<div class="counter-container" style="display:flex"><button class="btn-mini" onclick="updateQty(${p.id},-1);updateDetailControlsById(${p.id})">-</button><span>${q}</span><button class="btn-mini" onclick="updateQty(${p.id},1);updateDetailControlsById(${p.id})">+</button></div>`;
-            } else {
-                c.innerHTML = `<button class="add-to-cart-btn green-btn" onclick="addToCart(${p.id},'${p.name}',${p.price},'${p.img}');updateDetailControlsById(${p.id})">Savatga</button>`;
-            }
-        }
-
-        function updateDetailControlsById(id) { let p; for(let c in allProducts) { p = allProducts[c].find(i => i.id === id) || p; } updateDetailControls(p); }
-        function closeDetail() { document.getElementById('product-detail').style.display = 'none'; }
-
-        function addToCart(id, n, pr, im) { cart[id] = { id, name: n, price: pr, img: im, qty: 1 }; updateBadge(); if (currentTab === 'Menyu') renderProducts(getCurrentList()); }
-        function updateQty(id, d) { if (cart[id]) { cart[id].qty += d; if (cart[id].qty <= 0) delete cart[id]; } updateBadge(); if (currentTab === 'Menyu') renderProducts(getCurrentList()); else if (currentTab === 'Savat') showCart(); }
-        function updateBadge() { const t = Object.values(cart).reduce((a, b) => a + b.qty, 0); const b = document.getElementById('cart-badge'); b.innerText = t; b.style.display = t > 0 ? 'flex' : 'none'; }
 
         function showCart() {
             const container = document.getElementById('main-content');
             let total = 0;
-            let html = `<div class="cart-header"><h2>Savat</h2><div class="clear-cart" onclick="startClearCart()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Tozalash</div></div>`;
+            let html = "<h2>Savat</h2>";
             const items = Object.values(cart);
             items.forEach(i => {
                 total += i.price * i.qty;
-                html += `<div class="cart-item"><img src="${i.img}"><div class="cart-item-info"><div class="name">${i.name}</div><div class="price">${i.price.toLocaleString()} so'm</div></div><div class="cart-item-controls"><button class="btn-mini" onclick="updateQty(${i.id},-1)">-</button><span>${i.qty}</span><button class="btn-mini" onclick="updateQty(${i.id},1)">+</button></div></div>`;
+                html += `<div class="order-card" style="display:flex; align-items:center; gap:10px">
+                    <img src="${i.img}" style="width:50px; border-radius:5px">
+                    <div style="flex:1"><b>${i.name}</b><br>${i.qty} x ${i.price.toLocaleString()}</div>
+                    <div class="counter-container"><button class="btn-mini" onclick="updateQty(${i.id},-1);showCart()">-</button><span>${i.qty}</span><button class="btn-mini" onclick="updateQty(${i.id},1);showCart()">+</button></div>
+                </div>`;
             });
-            if (items.length === 0) html += `<p style="text-align:center; color:gray; margin-top:50px;">Savat bo'sh</p>`;
-            else html += `<div style="padding:20px; font-weight:bold; font-size:18px; text-align:right;">Jami: ${total.toLocaleString()} so'm</div><button onclick="startOrder()" style="width:100%; background:var(--brand-green); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; cursor:pointer;">Buyurtma berish</button>`;
+            if (items.length === 0) html += "<p style='text-align:center'>Savat bo'sh</p>";
+            else html += `<div style="text-align:right; font-weight:bold; margin-bottom:20px">Jami: ${total.toLocaleString()} so'm</div>
+                <button onclick="openModal('order-type-modal')" style="width:100%; background:var(--brand-green); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold">Buyurtma berish</button>`;
             container.innerHTML = html;
         }
 
-        function getCurrentList() { const q = document.getElementById('searchInput').value.toLowerCase(); if (q) { let f = []; Object.values(allProducts).forEach(c => f.push(...c.filter(p => p.name.toLowerCase().includes(q)))); return f; } return allProducts[currentCategory] || []; }
-        function searchProduct() { renderProducts(getCurrentList(), document.getElementById('searchInput').value ? 'Qidiruv natijalari' : currentCategory); }
-        function selectCategory(el, c) { document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); currentCategory = c; document.getElementById('searchInput').value = ''; renderProducts(allProducts[c]); }
-        function changeTab(el, t) { currentTab = t; document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); document.getElementById('cat-wrapper').style.display = t === 'Menyu' ? 'block' : 'none'; if(t === 'Menyu') renderProducts(getCurrentList()); else if(t === 'Savat') showCart(); else if(t === 'Buyurtmalar') showOrders(); else document.getElementById('main-content').innerHTML = `<h2>${t}</h2><p style="text-align:center; margin-top:50px;">Tez orada...</p>`; }
+        // TABS
+        function changeTab(el, t) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('cat-wrapper').style.display = t === 'Menyu' ? 'block' : 'none';
+            if (t === 'Menyu') renderProducts(allProducts[currentCategory]);
+            else if (t === 'Savat') showCart();
+            else if (t === 'Buyurtmalar') showOrders();
+        }
 
-        window.onload = () => renderProducts(allProducts['Lavash']);
+        function selectCategory(el, c) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            currentCategory = c;
+            renderProducts(allProducts[c]);
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function showMessage(t) { document.getElementById('msg-text').innerText = t; openModal('msg-modal'); }
+
+        window.onload = () => { renderProducts(allProducts['Lavash']); };
     </script>
 </body>
 </html>
