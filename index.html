@@ -7,81 +7,100 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --brand-green: #4CAF50; --bg: #f8f9fa; --text: #333; --gray: #8e8e93; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
         /* HEADER */
-        .header { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; z-index: 100; }
-        .brand { font-size: 20px; font-weight: 800; color: var(--brand-green); white-space: nowrap; }
+        .header { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .brand { font-size: 20px; font-weight: 800; color: var(--brand-green); }
         .search-box { background: #efeff4; border-radius: 10px; display: flex; align-items: center; padding: 6px 12px; flex: 1; }
         .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; height: 24px; }
 
         /* KATEGORIYALAR */
-        .cats-wrapper { background: white; padding: 10px 0; border-bottom: 1px solid #eee; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        .cats-wrapper { background: white; padding: 10px 0; border-bottom: 1px solid #eee; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
         .cats-wrapper::-webkit-scrollbar { display: none; }
         .cat-btn { display: inline-block; padding: 8px 16px; margin: 0 5px; border-radius: 15px; background: #f0f0f0; font-size: 13px; font-weight: 600; cursor: pointer; border: none; color: #555; }
         .cat-btn.active { background: var(--brand-green); color: white; }
 
-        /* KONTENT */
-        #main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        /* KONTENT MAYDONI */
+        .view-container { flex: 1; overflow-y: auto; position: relative; }
+        .view { display: none; padding: 15px; padding-bottom: 90px; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        .view.active { display: block; }
+
+        /* MAHSULOTLAR */
         .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .product-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
         .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
-        .price { color: var(--brand-green); font-weight: bold; margin: 5px 0; font-size: 14px; }
+        .price { color: var(--brand-green); font-weight: bold; margin: 5px 0; }
         
-        .add-btn { width: 100%; background: #f0f0f0; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 8px; overflow: hidden; }
-        .btn-m { background: none; border: none; color: white; font-size: 18px; padding: 5px 12px; cursor: pointer; font-weight: bold; }
-
-        /* SAHIFALAR */
-        .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 75px); background: white; z-index: 1000; overflow-y: auto; padding: 15px; box-sizing: border-box; }
-        .page-active { display: block; }
+        .add-btn { width: 100%; background: #f0f0f0; border: none; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 8px; }
+        .btn-m { background: none; border: none; color: white; font-size: 20px; padding: 5px 15px; font-weight: bold; }
 
         /* NAVIGATION BAR */
-        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; transition: 0.2s; }
-        .nav-item span { font-size: 22px; margin-bottom: 4px; filter: grayscale(100%); opacity: 0.6; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; position: relative; }
+        .nav-item .icon { font-size: 24px; margin-bottom: 2px; filter: grayscale(100%); opacity: 0.5; transition: 0.2s; }
         
-        /* BOSILGANDA QORA BO'LISHI */
+        /* BOSILGANDA ACTIVE HOLATI */
         .nav-item.active { color: #000; }
-        .nav-item.active span { filter: grayscale(0%); opacity: 1; transform: scale(1.1); }
+        .nav-item.active .icon { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
         .nav-item.active b { font-weight: 800; }
 
-        .badge { position: absolute; top: 12px; right: 28%; background: #ff3b30; color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; }
+        .badge { position: absolute; top: 10px; right: 25%; background: #ff3b30; color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; font-weight: bold; }
+        
+        .admin-btn { display: none; background: #000; color: white; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 20px; border: none; }
     </style>
 </head>
 <body>
 
-    <header class="header" id="app-header">
+    <header class="header" id="main-header">
         <div class="brand">Bahor</div>
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Qidirish..." oninput="searchProduct()">
+            <input type="text" id="search-input" placeholder="Mahsulot qidirish..." oninput="searchProduct()">
         </div>
     </header>
 
-    <div id="menu-view" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-        <div class="cats-wrapper">
-            <button class="cat-btn active" onclick="filterCat('Hammasi', this)">Hammasi</button>
-            <button class="cat-btn" onclick="filterCat('Lavash', this)">Lavash</button>
-            <button class="cat-btn" onclick="filterCat('Hot-dog', this)">Hot-dog</button>
-            <button class="cat-btn" onclick="filterCat('Ichimliklar', this)">Ichimliklar</button>
+    <div class="view-container">
+        <div id="menu-view" class="view active">
+            <div class="cats-wrapper" style="margin: -15px -15px 15px -15px;">
+                <button class="cat-btn active" onclick="filterCat('Hammasi', this)">Hammasi</button>
+                <button class="cat-btn" onclick="filterCat('Lavash', this)">Lavash</button>
+                <button class="cat-btn" onclick="filterCat('Hot-dog', this)">Hot-dog</button>
+                <button class="cat-btn" onclick="filterCat('Ichimliklar', this)">Ichimliklar</button>
+            </div>
+            <div id="products-list" class="products-grid"></div>
         </div>
-        <div id="main-content"></div>
+
+        <div id="cart-view" class="view">
+            <h2>Savat</h2>
+            <div id="cart-items"></div>
+        </div>
+
+        <div id="orders-view" class="view">
+            <h2>Buyurtmalarim</h2>
+            <div id="orders-list"></div>
+        </div>
+
+        <div id="profile-view" class="view">
+            <div style="text-align: center; padding: 20px 0;">
+                <div style="font-size: 60px;">👤</div>
+                <h3 id="user-name">Foydalanuvchi</h3>
+                <p id="user-id-text"></p>
+                <button id="admin-entry" class="admin-btn" onclick="alert('Admin panel tez kunda...')">ADMIN PANEL</button>
+            </div>
+        </div>
     </div>
 
-    <div id="cart-page" class="page"><h2>Savat</h2><div id="cart-items"></div></div>
-    <div id="orders-page" class="page"><h2>Buyurtmalarim</h2><div id="orders-list"></div></div>
-    <div id="profile-page" class="page"><h2>Profil</h2><div id="profile-info"></div></div>
-
     <nav class="nav">
-        <div class="nav-item active" onclick="showTab('menu', this)"><span>🏠</span><b>Menyu</b></div>
-        <div class="nav-item" onclick="showTab('cart', this)"><div id="cart-badge" class="badge">0</div><span>🛒</span><b>Savat</b></div>
-        <div class="nav-item" onclick="showTab('orders', this)"><span>📋</span><b>Buyurtmalar</b></div>
-        <div class="nav-item" onclick="showTab('profile', this)"><span>👤</span><b>Profil</b></div>
+        <div class="nav-item active" onclick="switchTab('menu', this)"><span class="icon">🏠</span><b>Menyu</b></div>
+        <div class="nav-item" onclick="switchTab('cart', this)"><div id="cart-count" class="badge">0</div><span class="icon">🛒</span><b>Savat</b></div>
+        <div class="nav-item" onclick="switchTab('orders', this)"><span class="icon">📋</span><b>Buyurtmalar</b></div>
+        <div class="nav-item" onclick="switchTab('profile', this)"><span class="icon">👤</span><b>Profil</b></div>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0ieeweZD3XoCCuJkGQRiJ86buVKchGpw",
@@ -98,11 +117,11 @@
 
         let tg = window.Telegram.WebApp;
         let userId = tg.initDataUnsafe?.user?.id || 0;
-        let cart = {};
         let products = [];
         let filtered = [];
+        let cart = {};
 
-        // BAZADAN MAHSULOTLARNI OLISH
+        // BAZADAN MAHSULOTLAR
         onSnapshot(collection(db, "products"), (snap) => {
             products = [];
             snap.forEach(d => products.push({id: d.id, ...d.data()}));
@@ -111,18 +130,16 @@
         });
 
         window.renderMenu = () => {
-            const cont = document.getElementById('main-content');
-            let html = '<div class="products-grid">';
-            filtered.forEach(p => {
+            const list = document.getElementById('products-list');
+            list.innerHTML = filtered.map(p => {
                 const q = cart[p.id]?.qty || 0;
-                html += `<div class="product-card">
+                return `<div class="product-card">
                     <img src="${p.img || 'https://via.placeholder.com/150'}">
                     <div style="font-weight:bold; font-size:14px; margin:8px 0; height:36px; overflow:hidden">${p.name}</div>
                     <div class="price">${p.price.toLocaleString()} so'm</div>
                     ${q > 0 ? `<div class="counter"><button class="btn-m" onclick="upd('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="upd('${p.id}',1)">+</button></div>` : `<button class="add-btn" onclick="upd('${p.id}',1)">Savatga</button>`}
                 </div>`;
-            });
-            cont.innerHTML = html + '</div>';
+            }).join('');
             updateBadge();
         };
 
@@ -133,45 +150,30 @@
             renderMenu();
         };
 
-        window.updateBadge = () => {
+        function updateBadge() {
             let count = Object.values(cart).reduce((a, b) => a + b.qty, 0);
-            let b = document.getElementById('cart-badge');
-            b.style.display = count > 0 ? 'flex' : 'none';
-            b.innerText = count;
+            let badge = document.getElementById('cart-count');
+            badge.style.display = count > 0 ? 'flex' : 'none';
+            badge.innerText = count;
         }
 
-        // NAVIGATION LOGIKASI
-        window.showTab = (tab, el) => {
-            // Hamma itemlarni kulrang qilish
+        window.switchTab = (tabId, el) => {
+            // Navigatsiya vizuali
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            // Bosilganini qora qilish
             el.classList.add('active');
 
-            // Hamma sahifalarni yopish
-            document.getElementById('menu-view').style.display = 'none';
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
-            
-            // "Bahor" headeri faqat profilda yo'qoladi
-            document.getElementById('app-header').style.display = (tab === 'profile') ? 'none' : 'flex';
+            // Sahifa ko'rinishi
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(tabId + '-view').classList.add('active');
 
-            if(tab === 'menu') {
-                document.getElementById('menu-view').style.display = 'flex';
-            } else {
-                document.getElementById(tab + '-page').classList.add('page-active');
-                if(tab === 'profile') renderProfile();
-                if(tab === 'orders') renderOrders();
+            // Header boshqaruvi
+            document.getElementById('main-header').style.display = (tabId === 'profile') ? 'none' : 'flex';
+
+            if(tabId === 'profile') {
+                document.getElementById('user-id-text').innerText = "ID: " + userId;
+                if(userId === MY_ID) document.getElementById('admin-entry').style.display = 'block';
             }
         };
-
-        window.renderProfile = () => {
-            const cont = document.getElementById('profile-info');
-            let isAdmin = userId === MY_ID;
-            cont.innerHTML = `<div style="text-align:center; padding-top:20px">
-                <div style="font-size:60px">👤</div>
-                <h3>Sizning ID: ${userId}</h3>
-                ${isAdmin ? `<button style="background:black; color:white; width:100%; padding:15px; border-radius:10px; margin-top:20px; font-weight:bold">ADMIN PANELGA KIRISH</button>` : ''}
-            </div>`;
-        }
 
         window.searchProduct = () => {
             let val = document.getElementById('search-input').value.toLowerCase();
@@ -186,7 +188,7 @@
             renderMenu();
         };
 
-        window.onload = () => renderMenu();
+        tg.expand();
     </script>
 </body>
 </html>
