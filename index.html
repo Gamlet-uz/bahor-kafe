@@ -9,24 +9,19 @@
         :root { --brand-green: #4CAF50; --bg: #f8f9fa; --text: #333; --gray: #8e8e93; }
         body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* HEADER */
         .header { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .brand { font-size: 20px; font-weight: 800; color: var(--brand-green); }
         .search-box { background: #efeff4; border-radius: 10px; display: flex; align-items: center; padding: 6px 12px; flex: 1; }
         .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; height: 24px; }
 
-        /* KATEGORIYALAR */
         .cats-wrapper { background: white; padding: 10px 0; border-bottom: 1px solid #eee; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
-        .cats-wrapper::-webkit-scrollbar { display: none; }
         .cat-btn { display: inline-block; padding: 8px 16px; margin: 0 5px; border-radius: 15px; background: #f0f0f0; font-size: 13px; font-weight: 600; cursor: pointer; border: none; color: #555; }
         .cat-btn.active { background: var(--brand-green); color: white; }
 
-        /* KONTENT MAYDONI */
         .view-container { flex: 1; overflow-y: auto; position: relative; }
-        .view { display: none; padding: 15px; padding-bottom: 90px; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        .view { display: none; padding: 15px; padding-bottom: 90px; height: 100%; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* MAHSULOTLAR */
         .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .product-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
         .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
@@ -36,19 +31,17 @@
         .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 8px; }
         .btn-m { background: none; border: none; color: white; font-size: 20px; padding: 5px 15px; font-weight: bold; }
 
-        /* NAVIGATION BAR */
-        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; position: relative; }
-        .nav-item .icon { font-size: 24px; margin-bottom: 2px; filter: grayscale(100%); opacity: 0.5; transition: 0.2s; }
+        /* MODAL ADMIN */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         
-        /* BOSILGANDA ACTIVE HOLATI */
-        .nav-item.active { color: #000; }
-        .nav-item.active .icon { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
-        .nav-item.active b { font-weight: 800; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .save-btn { background: var(--brand-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        .badge { position: absolute; top: 10px; right: 25%; background: #ff3b30; color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; font-weight: bold; }
-        
-        .admin-btn { display: none; background: #000; color: white; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 20px; border: none; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; }
+        .nav-item.active { color: #000; }
+        .badge { position: absolute; top: 10px; right: 25%; background: #ff3b30; color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
     </style>
 </head>
 <body>
@@ -76,31 +69,52 @@
             <div id="cart-items"></div>
         </div>
 
-        <div id="orders-view" class="view">
-            <h2>Buyurtmalarim</h2>
-            <div id="orders-list"></div>
-        </div>
-
         <div id="profile-view" class="view">
             <div style="text-align: center; padding: 20px 0;">
                 <div style="font-size: 60px;">👤</div>
-                <h3 id="user-name">Foydalanuvchi</h3>
-                <p id="user-id-text"></p>
-                <button id="admin-entry" class="admin-btn" onclick="alert('Admin panel tez kunda...')">ADMIN PANEL</button>
+                <h3 id="p-name">Foydalanuvchi</h3>
+                <div id="user-info-box" style="background: white; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 20px;">
+                    <p><b>ID:</b> <span id="p-id">0</span></p>
+                    <p><b>Telefon:</b> <span id="p-phone">Kiritilmagan</span></p>
+                    <p><b>Yosh:</b> <span id="p-age">Kiritilmagan</span></p>
+                </div>
+                <button id="admin-btn" style="display:none; background: #000; color: white; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; border: none;" onclick="openAdmin()">ADMIN PANEL</button>
             </div>
         </div>
     </div>
 
+    <div id="admin-modal" class="modal">
+        <div class="modal-header">
+            <h2>Admin Panel</h2>
+            <button onclick="closeAdmin()" style="border:none; background:none; font-size:24px;">✕</button>
+        </div>
+        <div id="admin-content">
+            <h3>Yangi mahsulot qo'shish</h3>
+            <input type="text" id="new-p-name" placeholder="Nomi">
+            <input type="number" id="new-p-price" placeholder="Narxi">
+            <input type="text" id="new-p-img" placeholder="Rasm linki">
+            <select id="new-p-cat">
+                <option value="Lavash">Lavash</option>
+                <option value="Hot-dog">Hot-dog</option>
+                <option value="Ichimliklar">Ichimliklar</option>
+            </select>
+            <button class="save-btn" onclick="addProduct()">QO'SHISH</button>
+            
+            <hr>
+            <h3>Barcha mahsulotlar</h3>
+            <div id="admin-products-list"></div>
+        </div>
+    </div>
+
     <nav class="nav">
-        <div class="nav-item active" onclick="switchTab('menu', this)"><span class="icon">🏠</span><b>Menyu</b></div>
-        <div class="nav-item" onclick="switchTab('cart', this)"><div id="cart-count" class="badge">0</div><span class="icon">🛒</span><b>Savat</b></div>
-        <div class="nav-item" onclick="switchTab('orders', this)"><span class="icon">📋</span><b>Buyurtmalar</b></div>
-        <div class="nav-item" onclick="switchTab('profile', this)"><span class="icon">👤</span><b>Profil</b></div>
+        <div class="nav-item active" onclick="switchTab('menu', this)">🏠 <b>Menyu</b></div>
+        <div class="nav-item" onclick="switchTab('cart', this)"><div id="cart-count" class="badge">0</div>🛒 <b>Savat</b></div>
+        <div class="nav-item" onclick="switchTab('profile', this)">👤 <b>Profil</b></div>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0ieeweZD3XoCCuJkGQRiJ86buVKchGpw",
@@ -113,30 +127,29 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const MY_ID = 5630950142;
+        const ADMIN_ID = 5630950142;
 
         let tg = window.Telegram.WebApp;
         let userId = tg.initDataUnsafe?.user?.id || 0;
         let products = [];
-        let filtered = [];
         let cart = {};
 
-        // BAZADAN MAHSULOTLAR
+        // BAZADAN YUKLASH
         onSnapshot(collection(db, "products"), (snap) => {
             products = [];
             snap.forEach(d => products.push({id: d.id, ...d.data()}));
-            filtered = products;
             renderMenu();
+            renderAdminProducts();
         });
 
         window.renderMenu = () => {
             const list = document.getElementById('products-list');
-            list.innerHTML = filtered.map(p => {
+            list.innerHTML = products.map(p => {
                 const q = cart[p.id]?.qty || 0;
                 return `<div class="product-card">
                     <img src="${p.img || 'https://via.placeholder.com/150'}">
-                    <div style="font-weight:bold; font-size:14px; margin:8px 0; height:36px; overflow:hidden">${p.name}</div>
-                    <div class="price">${p.price.toLocaleString()} so'm</div>
+                    <div style="font-weight:bold; margin-top:8px;">${p.name}</div>
+                    <div class="price">${Number(p.price).toLocaleString()} so'm</div>
                     ${q > 0 ? `<div class="counter"><button class="btn-m" onclick="upd('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="upd('${p.id}',1)">+</button></div>` : `<button class="add-btn" onclick="upd('${p.id}',1)">Savatga</button>`}
                 </div>`;
             }).join('');
@@ -148,6 +161,37 @@
             cart[id].qty += d;
             if(cart[id].qty <= 0) delete cart[id];
             renderMenu();
+            if(document.getElementById('cart-view').classList.contains('active')) renderCart();
+        };
+
+        window.renderCart = () => {
+            const container = document.getElementById('cart-items');
+            const items = Object.values(cart);
+            if(items.length === 0) { container.innerHTML = "Savat bo'sh"; return; }
+            let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
+            container.innerHTML = items.map(p => `
+                <div style="background:white; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <div><b>${p.name}</b><br>${p.qty} x ${p.price}</div>
+                    <div><b>${p.qty * p.price} so'm</b></div>
+                </div>
+            `).join('') + `<button class="save-btn" onclick="sendOrder()">BUYURTMA BERISH (${total} so'm)</button>`;
+        };
+
+        window.sendOrder = () => {
+            tg.sendData(JSON.stringify({items: Object.values(cart), total: Object.values(cart).reduce((a,b)=>a+(b.price*b.qty),0)}));
+        };
+
+        window.switchTab = (tabId, el) => {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(tabId + '-view').classList.add('active');
+            if(tabId === 'cart') renderCart();
+            if(tabId === 'profile') {
+                document.getElementById('p-name').innerText = tg.initDataUnsafe?.user?.first_name || "Foydalanuvchi";
+                document.getElementById('p-id').innerText = userId;
+                if(userId === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
+            }
         };
 
         function updateBadge() {
@@ -157,36 +201,33 @@
             badge.innerText = count;
         }
 
-        window.switchTab = (tabId, el) => {
-            // Navigatsiya vizuali
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+        // ADMIN FUNKSIYALARI
+        window.openAdmin = () => document.getElementById('admin-modal').style.display = 'block';
+        window.closeAdmin = () => document.getElementById('admin-modal').style.display = 'none';
 
-            // Sahifa ko'rinishi
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(tabId + '-view').classList.add('active');
-
-            // Header boshqaruvi
-            document.getElementById('main-header').style.display = (tabId === 'profile') ? 'none' : 'flex';
-
-            if(tabId === 'profile') {
-                document.getElementById('user-id-text').innerText = "ID: " + userId;
-                if(userId === MY_ID) document.getElementById('admin-entry').style.display = 'block';
-            }
+        window.addProduct = async () => {
+            const name = document.getElementById('new-p-name').value;
+            const price = Number(document.getElementById('new-p-price').value);
+            const img = document.getElementById('new-p-img').value;
+            const cat = document.getElementById('new-p-cat').value;
+            if(!name || !price) return alert("Ma'lumotni to'ldiring");
+            await addDoc(collection(db, "products"), { name, price, img, cat });
+            alert("Qo'shildi!");
         };
 
-        window.searchProduct = () => {
-            let val = document.getElementById('search-input').value.toLowerCase();
-            filtered = products.filter(p => p.name.toLowerCase().includes(val));
-            renderMenu();
+        window.delProduct = async (id) => {
+            if(confirm("O'chirilsinmi?")) await deleteDoc(doc(db, "products", id));
         };
 
-        window.filterCat = (cat, btn) => {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filtered = (cat === 'Hammasi') ? products : products.filter(p => p.cat === cat);
-            renderMenu();
-        };
+        function renderAdminProducts() {
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = products.map(p => `
+                <div style="display:flex; justify-content:space-between; background:#f9f9f9; padding:10px; margin-bottom:5px; border-radius:8px;">
+                    <span>${p.name}</span>
+                    <button onclick="delProduct('${p.id}')" style="color:red; border:none; background:none;">O'chirish</button>
+                </div>
+            `).join('');
+        }
 
         tg.expand();
     </script>
