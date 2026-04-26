@@ -6,42 +6,87 @@
     <title>Bahor Kafe</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --brand-green: #4CAF50; --bg: #f8f9fa; --text: #333; --gray: #8e8e93; }
-        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        :root { --brand-green: #4CAF50; --bg: #f8f9fa; --text: #333; --gray: #8e8e93; --red: #ff3b30; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        .header { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .brand { font-size: 20px; font-weight: 800; color: var(--brand-green); }
-        .search-box { background: #efeff4; border-radius: 10px; display: flex; align-items: center; padding: 6px 12px; flex: 1; }
-        .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; height: 24px; }
+        /* HEADER */
+        .header { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; flex-shrink: 0; z-index: 10; }
+        .brand { font-size: 22px; font-weight: 800; color: var(--brand-green); }
+        .search-box { background: #efeff4; border-radius: 10px; display: flex; align-items: center; padding: 8px 12px; flex: 1; }
+        .search-box input { border: none; background: transparent; width: 100%; font-size: 15px; }
 
-        .cats-wrapper { background: white; padding: 10px 0; border-bottom: 1px solid #eee; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
-        .cat-btn { display: inline-block; padding: 8px 16px; margin: 0 5px; border-radius: 15px; background: #f0f0f0; font-size: 13px; font-weight: 600; cursor: pointer; border: none; color: #555; }
+        /* KATEGORIYALAR */
+        .cats-wrapper { background: white; padding: 12px 15px; border-bottom: 1px solid #eee; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
+        .cats-wrapper::-webkit-scrollbar { display: none; }
+        .cat-btn { display: inline-block; padding: 8px 18px; margin-right: 8px; border-radius: 20px; background: #f0f0f0; font-size: 14px; font-weight: 600; cursor: pointer; border: none; color: #555; transition: 0.2s; }
         .cat-btn.active { background: var(--brand-green); color: white; }
 
+        /* ASOSIY OYNALAR */
         .view-container { flex: 1; overflow-y: auto; position: relative; }
-        .view { display: none; padding: 15px; padding-bottom: 90px; height: 100%; box-sizing: border-box; }
+        .view { display: none; padding: 15px; padding-bottom: 100px; min-height: 100%; } /* NAV BAR YOPMASLIGI UCHUN 100px PADDING */
         .view.active { display: block; }
 
+        /* MAHSULOTLAR GRID */
         .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .product-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-        .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
-        .price { color: var(--brand-green); font-weight: bold; margin: 5px 0; }
-        
-        .add-btn { width: 100%; background: #f0f0f0; border: none; padding: 10px; border-radius: 8px; font-weight: bold; }
-        .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 8px; }
-        .btn-m { background: none; border: none; color: white; font-size: 20px; padding: 5px 15px; font-weight: bold; }
+        .product-card { background: white; border-radius: 16px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
+        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; cursor: pointer; }
+        .p-title { font-weight: bold; font-size: 15px; margin: 8px 0 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .p-price { color: var(--brand-green); font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+        .add-btn { width: 100%; background: #f0f0f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; margin-top: auto; cursor: pointer; }
+        .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 10px; margin-top: auto; }
+        .btn-m { background: none; border: none; color: white; font-size: 18px; padding: 8px 15px; font-weight: bold; cursor: pointer; }
 
-        /* MODAL ADMIN */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .save-btn { background: var(--brand-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* LIST KARTALAR (Savat, Buyurtmalar) */
+        .list-card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer;}
+        .list-info { display: flex; flex-direction: column; gap: 5px; }
 
-        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; }
-        .nav-item.active { color: #000; }
-        .badge { position: absolute; top: 10px; right: 25%; background: #ff3b30; color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; }
+        /* PROFIL */
+        .profile-header { text-align: center; padding: 30px 0 20px 0; }
+        .avatar { font-size: 70px; background: #e0e0e0; border-radius: 50%; width: 100px; height: 100px; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+        .p-name-big { font-size: 22px; font-weight: 800; margin: 0 0 15px 0; text-transform: capitalize; }
+        .p-info-box { background: white; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 15px; }
+        .p-row:last-child { border: none; }
+        .p-row b { color: var(--gray); font-weight: normal; }
+        .p-row span { font-weight: 600; }
+
+        /* NAV BAR */
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #eee; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -2px 10px rgba(0,0,0,0.03); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--gray); cursor: pointer; position: relative; }
+        .nav-item .icon { font-size: 22px; margin-bottom: 4px; filter: grayscale(100%); opacity: 0.5; transition: 0.2s; }
+        .nav-item.active { color: var(--brand-green); }
+        .nav-item.active .icon { filter: grayscale(0%); opacity: 1; transform: scale(1.1); }
+        .badge { position: absolute; top: 6px; right: 20%; background: var(--red); color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid white; font-weight: bold; }
+
+        /* MODALS & FULLSCREEN VIEWS */
+        .full-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; overflow-y: auto; padding-bottom: 30px; }
+        .modal-header { position: sticky; top: 0; background: white; padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #eee; z-index: 10; font-weight: bold; font-size: 18px; }
+        .back-btn { background: none; border: none; font-size: 24px; color: var(--text); padding: 0; cursor: pointer; }
+        
+        .main-btn { background: var(--brand-green); color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        .danger-btn { background: var(--red); color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        
+        .input-style { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 15px; background: #fafafa; }
+        textarea.input-style { height: 100px; resize: none; }
+
+        /* PRODUCT DETAIL SPECIFIC */
+        .pd-img { width: 100%; height: 250px; object-fit: cover; }
+        .pd-content { padding: 20px; background: white; border-radius: 20px 20px 0 0; margin-top: -20px; position: relative; min-height: 50vh; }
+        .pd-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .pd-desc { color: #666; line-height: 1.5; margin-top: 20px; font-size: 15px; }
+
+        /* CUSTOM CONFIRM */
+        .confirm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center; }
+        .confirm-box { background: white; padding: 25px; border-radius: 20px; width: 80%; text-align: center; }
+        .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .confirm-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; color: white; font-size: 16px; }
+        .btn-yes { background: var(--red); }
+        .btn-no { background: var(--brand-green); }
+
+        /* ADMIN PANEL CARDS */
+        .admin-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .admin-card hr { border: none; border-top: 1px solid #eee; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -49,72 +94,179 @@
     <header class="header" id="main-header">
         <div class="brand">Bahor</div>
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Mahsulot qidirish..." oninput="searchProduct()">
+            <input type="text" id="search-input" placeholder="Mahsulot qidirish..." oninput="filterProducts()">
         </div>
     </header>
 
     <div class="view-container">
+        
         <div id="menu-view" class="view active">
-            <div class="cats-wrapper" style="margin: -15px -15px 15px -15px;">
-                <button class="cat-btn active" onclick="filterCat('Hammasi', this)">Hammasi</button>
-                <button class="cat-btn" onclick="filterCat('Lavash', this)">Lavash</button>
-                <button class="cat-btn" onclick="filterCat('Hot-dog', this)">Hot-dog</button>
-                <button class="cat-btn" onclick="filterCat('Ichimliklar', this)">Ichimliklar</button>
+            <div class="cats-wrapper" id="cats-container" style="margin: -15px -15px 15px -15px;">
+                <button class="cat-btn active" onclick="setCategory('Hammasi')">Hammasi</button>
+                <button class="cat-btn" onclick="setCategory('Lavash')">Lavash</button>
+                <button class="cat-btn" onclick="setCategory('Hot-dog')">Hot-dog</button>
+                <button class="cat-btn" onclick="setCategory('Burger')">Burger</button>
+                <button class="cat-btn" onclick="setCategory('Ichimliklar')">Ichimliklar</button>
             </div>
             <div id="products-list" class="products-grid"></div>
         </div>
 
         <div id="cart-view" class="view">
-            <h2>Savat</h2>
+            <h2 style="margin-top:0;">Savat</h2>
             <div id="cart-items"></div>
         </div>
 
+        <div id="orders-view" class="view">
+            <h2 style="margin-top:0;">Buyurtmalarim</h2>
+            <div id="my-orders-list"></div>
+        </div>
+
         <div id="profile-view" class="view">
-            <div style="text-align: center; padding: 20px 0;">
-                <div style="font-size: 60px;">👤</div>
-                <h3 id="p-name">Foydalanuvchi</h3>
-                <div id="user-info-box" style="background: white; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 20px;">
-                    <p><b>ID:</b> <span id="p-id">0</span></p>
-                    <p><b>Telefon:</b> <span id="p-phone">Kiritilmagan</span></p>
-                    <p><b>Yosh:</b> <span id="p-age">Kiritilmagan</span></p>
+            <div class="profile-header">
+                <div class="avatar">👤</div>
+                <h2 class="p-name-big" id="prof-name">Ism Familiya</h2>
+            </div>
+            <div class="p-info-box">
+                <div class="p-row"><b>Telefon:</b> <span id="prof-phone">+998 __ ___ __ __</span></div>
+                <div class="p-row"><b>Tug'ilgan sana:</b> <span id="prof-dob">Kun/Oy/Yil</span></div>
+            </div>
+            <button class="main-btn" onclick="openProfileEdit()" style="background:#e0e0e0; color:#333;">Ma'lumotlarni tahrirlash</button>
+            <button id="btn-admin-panel" class="main-btn" style="background:#000; display:none; margin-top:20px;" onclick="openAdminPanel()">👨‍💻 ADMIN PANEL</button>
+        </div>
+
+    </div>
+
+    <nav class="nav" id="main-nav">
+        <div class="nav-item active" onclick="switchTab('menu', this)"><div class="icon">🏠</div><b>Menyu</b></div>
+        <div class="nav-item" onclick="switchTab('cart', this)"><div id="cart-count" class="badge">0</div><div class="icon">🛒</div><b>Savat</b></div>
+        <div class="nav-item" onclick="switchTab('orders', this)"><div class="icon">📋</div><b>Buyurtmalar</b></div>
+        <div class="nav-item" onclick="switchTab('profile', this)"><div class="icon">👤</div><b>Profil</b></div>
+    </nav>
+
+
+    <div id="product-modal" class="full-modal">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closeModal('product-modal')">←</button>
+            <span>Mahsulot</span>
+        </div>
+        <img id="pm-img" class="pd-img" src="">
+        <div class="pd-content">
+            <div class="pd-flex">
+                <div>
+                    <h2 id="pm-name" style="margin:0 0 5px 0;">Nomi</h2>
+                    <div id="pm-price" style="color:var(--brand-green); font-size:18px; font-weight:800;">Narxi</div>
                 </div>
-                <button id="admin-btn" style="display:none; background: #000; color: white; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; border: none;" onclick="openAdmin()">ADMIN PANEL</button>
+                <div id="pm-action"></div>
+            </div>
+            <hr style="border:none; border-top:1px solid #eee;">
+            <div class="pd-desc" id="pm-desc">Tavsif...</div>
+        </div>
+    </div>
+
+    <div id="order-detail-modal" class="full-modal">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closeModal('order-detail-modal')">←</button>
+            <span>Buyurtma tavsiloti</span>
+        </div>
+        <div style="padding: 15px;" id="od-content"></div>
+    </div>
+
+    <div id="profile-edit-modal" class="full-modal" style="background: white;">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closeModal('profile-edit-modal')">←</button>
+            <span>Profilni tahrirlash</span>
+        </div>
+        <div style="padding: 20px;">
+            <label style="font-weight:bold; color:var(--gray);">Ismingiz</label>
+            <input type="text" id="edit-name" class="input-style" placeholder="Ismingiz">
+            <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Telefon raqam (+998)</label>
+            <input type="tel" id="edit-phone" class="input-style" placeholder="70 015 12 23" oninput="formatPhone(this)" maxlength="12">
+            <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Tug'ilgan sana</label>
+            <input type="text" id="edit-dob" class="input-style" placeholder="31/12/2000" oninput="formatDOB(this)" maxlength="10">
+            <button class="main-btn" onclick="saveProfile()">Saqlash</button>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="full-modal" style="background: white;">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closeModal('checkout-modal')">←</button>
+            <span>Buyurtmani rasmiylashtirish</span>
+        </div>
+        <div style="padding: 20px;">
+            <h2 style="text-align:center; margin-top:0;">Umumiy narx: <br><span id="checkout-total" style="color:var(--brand-green);">0 so'm</span></h2>
+            <label style="font-weight:bold; color:var(--gray); margin-top:20px; display:block;">Buyurtma olib ketish joyi (Manzil):</label>
+            <textarea id="checkout-address" class="input-style" placeholder="Shahar, ko'cha, uy raqami yoki mo'ljal..."></textarea>
+            <button class="main-btn" onclick="submitOrder()">Tastiqlash va Yuborish</button>
+        </div>
+    </div>
+
+
+    <div id="admin-panel-modal" class="full-modal">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closeModal('admin-panel-modal')">←</button>
+            <span>Boshqaruv Paneli</span>
+        </div>
+        <div style="padding: 15px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-orders')">📦 Buyurtmalar</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-prods')">🍔 Mahsulotlar</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-add-prod')">➕ Qo'shish</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-users')">🛡 Adminlar</div>
+            </div>
+
+            <div id="admin-orders" class="admin-section">
+                <h3>Kelib tushgan buyurtmalar</h3>
+                <div id="admin-orders-list"></div>
+            </div>
+
+            <div id="admin-prods" class="admin-section" style="display:none;">
+                <h3>Barcha mahsulotlar</h3>
+                <div id="admin-products-list"></div>
+            </div>
+
+            <div id="admin-add-prod" class="admin-section" style="display:none;">
+                <h3 id="form-title">Yangi mahsulot</h3>
+                <input type="hidden" id="ap-id">
+                <input type="text" id="ap-name" class="input-style" placeholder="Nomi">
+                <input type="number" id="ap-price" class="input-style" placeholder="Narxi (so'm)">
+                <input type="text" id="ap-img" class="input-style" placeholder="Rasm linki (URL)">
+                <select id="ap-cat" class="input-style">
+                    <option value="Lavash">Lavash</option>
+                    <option value="Hot-dog">Hot-dog</option>
+                    <option value="Burger">Burger</option>
+                    <option value="Ichimliklar">Ichimliklar</option>
+                </select>
+                <textarea id="ap-desc" class="input-style" placeholder="Tavsif..."></textarea>
+                <button class="main-btn" onclick="saveProduct()">Saqlash</button>
+                <button class="danger-btn" style="background:#8e8e93;" onclick="resetAdminForm()">Bekor qilish</button>
+            </div>
+
+            <div id="admin-users" class="admin-section" style="display:none;">
+                <h3>Adminlar ro'yxati</h3>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <input type="number" id="new-admin-id" class="input-style" style="margin:0;" placeholder="Telegram ID">
+                    <button class="main-btn" style="margin:0; width:100px;" onclick="addAdmin()">Qo'shish</button>
+                </div>
+                <div id="admin-users-list"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="confirm-overlay">
+        <div class="confirm-box">
+            <h3 style="margin-top:0;">Mahsulot o'chirilsinmi?</h3>
+            <p style="color:var(--gray); font-size:14px;">Bu amalni bekor qilib bo'lmaydi.</p>
+            <div class="confirm-btns">
+                <button class="btn-no" onclick="closeConfirm()">Yo'q</button>
+                <button class="btn-yes" id="confirm-yes-btn">Ha</button>
             </div>
         </div>
     </div>
 
-    <div id="admin-modal" class="modal">
-        <div class="modal-header">
-            <h2>Admin Panel</h2>
-            <button onclick="closeAdmin()" style="border:none; background:none; font-size:24px;">✕</button>
-        </div>
-        <div id="admin-content">
-            <h3>Yangi mahsulot qo'shish</h3>
-            <input type="text" id="new-p-name" placeholder="Nomi">
-            <input type="number" id="new-p-price" placeholder="Narxi">
-            <input type="text" id="new-p-img" placeholder="Rasm linki">
-            <select id="new-p-cat">
-                <option value="Lavash">Lavash</option>
-                <option value="Hot-dog">Hot-dog</option>
-                <option value="Ichimliklar">Ichimliklar</option>
-            </select>
-            <button class="save-btn" onclick="addProduct()">QO'SHISH</button>
-            
-            <hr>
-            <h3>Barcha mahsulotlar</h3>
-            <div id="admin-products-list"></div>
-        </div>
-    </div>
-
-    <nav class="nav">
-        <div class="nav-item active" onclick="switchTab('menu', this)">🏠 <b>Menyu</b></div>
-        <div class="nav-item" onclick="switchTab('cart', this)"><div id="cart-count" class="badge">0</div>🛒 <b>Savat</b></div>
-        <div class="nav-item" onclick="switchTab('profile', this)">👤 <b>Profil</b></div>
-    </nav>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0ieeweZD3XoCCuJkGQRiJ86buVKchGpw",
@@ -127,70 +279,121 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const ADMIN_ID = 5630950142;
-
+        
         let tg = window.Telegram.WebApp;
-        let userId = tg.initDataUnsafe?.user?.id || 0;
+        tg.expand();
+        
+        let userId = tg.initDataUnsafe?.user?.id?.toString() || "123456789"; // Test uchun default
+        let userName = tg.initDataUnsafe?.user?.first_name || "Foydalanuvchi";
+        
+        // Global Holatlar
         let products = [];
+        let filteredProducts = [];
         let cart = {};
+        let myOrders = [];
+        let allOrders = [];
+        let admins = ["5630950142"]; // Asosiy admin (o'chirib bo'lmaydi)
+        let currentCat = "Hammasi";
+        let searchQuery = "";
+        let userData = { phone: "", dob: "" };
 
-        // BAZADAN YUKLASH
+        // ------------------ FIREBASE ULANISHI ------------------
+
+        // Mahsulotlar
         onSnapshot(collection(db, "products"), (snap) => {
             products = [];
             snap.forEach(d => products.push({id: d.id, ...d.data()}));
-            renderMenu();
-            renderAdminProducts();
+            applyFilters();
+            if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminProducts();
         });
+
+        // Buyurtmalar (Hammasi)
+        onSnapshot(query(collection(db, "orders"), orderBy("date", "desc")), (snap) => {
+            allOrders = [];
+            myOrders = [];
+            snap.forEach(d => {
+                let order = {id: d.id, ...d.data()};
+                allOrders.push(order);
+                if(order.userId === userId) myOrders.push(order);
+            });
+            renderMyOrders();
+            if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminOrders();
+        });
+
+        // Adminlar ro'yxati
+        onSnapshot(doc(db, "settings", "admins"), (docSnap) => {
+            if (docSnap.exists()) {
+                admins = docSnap.data().list || admins;
+            } else {
+                setDoc(doc(db, "settings", "admins"), { list: admins });
+            }
+            checkAdmin();
+            renderAdminUsers();
+        });
+
+        // Foydalanuvchi profili
+        getDoc(doc(db, "users", userId)).then(docSnap => {
+            if(docSnap.exists()) {
+                let data = docSnap.data();
+                userName = data.name || userName;
+                userData.phone = data.phone || "";
+                userData.dob = data.dob || "";
+            }
+            updateProfileView();
+        });
+
+        // ------------------ MENYU VA MAHSULOTLAR ------------------
+
+        window.setCategory = (cat) => {
+            currentCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.toggle('active', b.innerText === cat);
+            });
+            applyFilters();
+        };
+
+        window.filterProducts = () => {
+            searchQuery = document.getElementById('search-input').value.toLowerCase();
+            applyFilters();
+        };
+
+        function applyFilters() {
+            filteredProducts = products.filter(p => {
+                let matchCat = currentCat === 'Hammasi' || p.cat === currentCat;
+                let matchSearch = p.name.toLowerCase().includes(searchQuery);
+                return matchCat && matchSearch;
+            });
+            renderMenu();
+        }
 
         window.renderMenu = () => {
             const list = document.getElementById('products-list');
-            list.innerHTML = products.map(p => {
+            list.innerHTML = filteredProducts.map(p => {
                 const q = cart[p.id]?.qty || 0;
-                return `<div class="product-card">
-                    <img src="${p.img || 'https://via.placeholder.com/150'}">
-                    <div style="font-weight:bold; margin-top:8px;">${p.name}</div>
-                    <div class="price">${Number(p.price).toLocaleString()} so'm</div>
-                    ${q > 0 ? `<div class="counter"><button class="btn-m" onclick="upd('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="upd('${p.id}',1)">+</button></div>` : `<button class="add-btn" onclick="upd('${p.id}',1)">Savatga</button>`}
+                return `
+                <div class="product-card">
+                    <img src="${p.img || 'https://via.placeholder.com/300'}" onclick="openProductModal('${p.id}')">
+                    <div class="p-title">${p.name}</div>
+                    <div class="p-price">${Number(p.price).toLocaleString()} so'm</div>
+                    ${q > 0 ? `<div class="counter"><button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="updateCart('${p.id}',1)">+</button></div>` 
+                            : `<button class="add-btn" onclick="updateCart('${p.id}',1)">Savatga</button>`}
                 </div>`;
             }).join('');
             updateBadge();
         };
 
-        window.upd = (id, d) => {
+        // ------------------ SAVAT (CART) LOGIKASI ------------------
+
+        window.updateCart = (id, delta) => {
             if(!cart[id]) cart[id] = {...products.find(x=>x.id===id), qty:0};
-            cart[id].qty += d;
+            cart[id].qty += delta;
             if(cart[id].qty <= 0) delete cart[id];
+            
             renderMenu();
-            if(document.getElementById('cart-view').classList.contains('active')) renderCart();
-        };
-
-        window.renderCart = () => {
-            const container = document.getElementById('cart-items');
-            const items = Object.values(cart);
-            if(items.length === 0) { container.innerHTML = "Savat bo'sh"; return; }
-            let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
-            container.innerHTML = items.map(p => `
-                <div style="background:white; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between;">
-                    <div><b>${p.name}</b><br>${p.qty} x ${p.price}</div>
-                    <div><b>${p.qty * p.price} so'm</b></div>
-                </div>
-            `).join('') + `<button class="save-btn" onclick="sendOrder()">BUYURTMA BERISH (${total} so'm)</button>`;
-        };
-
-        window.sendOrder = () => {
-            tg.sendData(JSON.stringify({items: Object.values(cart), total: Object.values(cart).reduce((a,b)=>a+(b.price*b.qty),0)}));
-        };
-
-        window.switchTab = (tabId, el) => {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(tabId + '-view').classList.add('active');
-            if(tabId === 'cart') renderCart();
-            if(tabId === 'profile') {
-                document.getElementById('p-name').innerText = tg.initDataUnsafe?.user?.first_name || "Foydalanuvchi";
-                document.getElementById('p-id').innerText = userId;
-                if(userId === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
+            renderCart();
+            // Agar mahsulot oynasi ochiq bo'lsa, uni ham yangilash
+            if(document.getElementById('product-modal').style.display === 'block') {
+                openProductModal(id); 
             }
         };
 
@@ -201,35 +404,351 @@
             badge.innerText = count;
         }
 
-        // ADMIN FUNKSIYALARI
-        window.openAdmin = () => document.getElementById('admin-modal').style.display = 'block';
-        window.closeAdmin = () => document.getElementById('admin-modal').style.display = 'none';
-
-        window.addProduct = async () => {
-            const name = document.getElementById('new-p-name').value;
-            const price = Number(document.getElementById('new-p-price').value);
-            const img = document.getElementById('new-p-img').value;
-            const cat = document.getElementById('new-p-cat').value;
-            if(!name || !price) return alert("Ma'lumotni to'ldiring");
-            await addDoc(collection(db, "products"), { name, price, img, cat });
-            alert("Qo'shildi!");
+        window.renderCart = () => {
+            const container = document.getElementById('cart-items');
+            const items = Object.values(cart);
+            if(items.length === 0) { 
+                container.innerHTML = "<div style='text-align:center; color:var(--gray); margin-top:40px;'>Savat bo'sh 🛒</div>"; 
+                return; 
+            }
+            
+            let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
+            
+            container.innerHTML = items.map(p => `
+                <div class="list-card">
+                    <div class="list-info">
+                        <b style="font-size:15px;">${p.name}</b>
+                        <span style="color:var(--brand-green); font-weight:bold;">${Number(p.price).toLocaleString()} so'm</span>
+                    </div>
+                    <div class="counter" style="min-width: 100px;">
+                        <button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button>
+                        <span>${p.qty}</span>
+                        <button class="btn-m" onclick="updateCart('${p.id}',1)">+</button>
+                    </div>
+                </div>
+            `).join('') + `
+            <div style="margin-top:20px; padding:15px; background:white; border-radius:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; margin-bottom:15px;">
+                    <span>Jami:</span>
+                    <span>${total.toLocaleString()} so'm</span>
+                </div>
+                <button class="main-btn" style="margin:0;" onclick="openCheckout()">Buyurtma berish</button>
+            </div>`;
         };
 
-        window.delProduct = async (id) => {
-            if(confirm("O'chirilsinmi?")) await deleteDoc(doc(db, "products", id));
+        // ------------------ BUYURTMALAR (MIJOZ) ------------------
+
+        window.renderMyOrders = () => {
+            const list = document.getElementById('my-orders-list');
+            if(myOrders.length === 0) {
+                list.innerHTML = "<div style='text-align:center; color:var(--gray); margin-top:40px;'>Buyurtmalar yo'q</div>";
+                return;
+            }
+            list.innerHTML = myOrders.map(o => `
+                <div class="list-card" onclick="openOrderDetails('${o.id}')">
+                    <div class="list-info">
+                        <b style="font-size:16px;">Buyurtma #${o.orderNum}</b>
+                        <span style="color:var(--gray); font-size:13px;">${new Date(o.date).toLocaleString()}</span>
+                    </div>
+                    <div style="font-weight:800; color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</div>
+                </div>
+            `).join('');
         };
 
-        function renderAdminProducts() {
-            const list = document.getElementById('admin-products-list');
-            list.innerHTML = products.map(p => `
-                <div style="display:flex; justify-content:space-between; background:#f9f9f9; padding:10px; margin-bottom:5px; border-radius:8px;">
-                    <span>${p.name}</span>
-                    <button onclick="delProduct('${p.id}')" style="color:red; border:none; background:none;">O'chirish</button>
+        window.openOrderDetails = (orderId) => {
+            let o = allOrders.find(x => x.id === orderId);
+            if(!o) return;
+            
+            let html = `
+                <div class="p-info-box">
+                    <div class="p-row"><b>Buyurtma raqami:</b> <span>#${o.orderNum}</span></div>
+                    <div class="p-row"><b>Vaqti:</b> <span>${new Date(o.date).toLocaleString()}</span></div>
+                    <div class="p-row"><b>Manzil:</b> <span>${o.address}</span></div>
+                    ${o.userId !== userId ? `
+                        <div class="p-row"><b>Mijoz:</b> <span>${o.userName}</span></div>
+                        <div class="p-row"><b>Telefon:</b> <span>${o.phone}</span></div>
+                        <div class="p-row"><b>Yosh:</b> <span>${o.dob}</span></div>
+                    ` : ''}
+                </div>
+                <h3 style="margin-top:20px;">Mahsulotlar:</h3>
+                <div class="p-info-box">
+                    ${o.items.map(i => `
+                        <div class="p-row">
+                            <span>${i.name} (${i.qty}x)</span>
+                            <span>${(i.price * i.qty).toLocaleString()} so'm</span>
+                        </div>
+                    `).join('')}
+                    <div class="p-row" style="border-top:2px solid #eee; margin-top:10px;">
+                        <b>Jami:</b> <span style="color:var(--brand-green); font-size:18px;">${Number(o.total).toLocaleString()} so'm</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('od-content').innerHTML = html;
+            document.getElementById('order-detail-modal').style.display = 'block';
+        };
+
+        // ------------------ TO'LOV VA YUBORISH ------------------
+
+        window.openCheckout = () => {
+            let total = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
+            document.getElementById('checkout-total').innerText = total.toLocaleString() + " so'm";
+            document.getElementById('checkout-modal').style.display = 'block';
+        };
+
+        window.submitOrder = async () => {
+            let address = document.getElementById('checkout-address').value;
+            if(!address) return alert("Iltimos, manzilni kiriting!");
+            
+            let items = Object.values(cart).map(i => ({ name: i.name, qty: i.qty, price: i.price }));
+            let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
+            let orderNum = Math.floor(10000 + Math.random() * 90000); // 5 xonali tasodifiy raqam
+            
+            let orderObj = {
+                orderNum, userId, userName,
+                phone: userData.phone, dob: userData.dob,
+                address, items, total,
+                date: Date.now()
+            };
+
+            // Baza saqlash
+            await addDoc(collection(db, "orders"), orderObj);
+            
+            // Telegram botga xabar yuborish
+            tg.sendData(JSON.stringify({ action: "new_order", ...orderObj }));
+            
+            cart = {}; // Savatni tozalash
+            renderMenu();
+            renderCart();
+            closeModal('checkout-modal');
+            switchTab('orders', document.querySelectorAll('.nav-item')[2]);
+            tg.showAlert("Buyurtmangiz qabul qilindi! Raqam: #" + orderNum);
+        };
+
+        // ------------------ PROFIL ------------------
+
+        function updateProfileView() {
+            document.getElementById('prof-name').innerText = userName;
+            document.getElementById('prof-phone').innerText = userData.phone ? "+998 " + userData.phone : "Kiritilmagan";
+            document.getElementById('prof-dob').innerText = userData.dob || "Kiritilmagan";
+        }
+
+        window.openProfileEdit = () => {
+            document.getElementById('edit-name').value = userName;
+            document.getElementById('edit-phone').value = userData.phone;
+            document.getElementById('edit-dob').value = userData.dob;
+            document.getElementById('profile-edit-modal').style.display = 'block';
+        };
+
+        window.saveProfile = async () => {
+            userName = document.getElementById('edit-name').value;
+            userData.phone = document.getElementById('edit-phone').value;
+            userData.dob = document.getElementById('edit-dob').value;
+            
+            await setDoc(doc(db, "users", userId), { name: userName, phone: userData.phone, dob: userData.dob }, {merge:true});
+            updateProfileView();
+            closeModal('profile-edit-modal');
+        };
+
+        // Formatlash funksiyalari
+        window.formatPhone = (el) => {
+            let val = el.value.replace(/\D/g, '').substring(0,9);
+            let res = "";
+            if(val.length > 0) res += val.substring(0,2);
+            if(val.length > 2) res += " " + val.substring(2,5);
+            if(val.length > 5) res += " " + val.substring(5,7);
+            if(val.length > 7) res += " " + val.substring(7,9);
+            el.value = res;
+        };
+        window.formatDOB = (el) => {
+            let val = el.value.replace(/\D/g, '').substring(0,8);
+            let res = "";
+            if(val.length > 0) res += val.substring(0,2);
+            if(val.length > 2) res += "/" + val.substring(2,4);
+            if(val.length > 4) res += "/" + val.substring(4,8);
+            el.value = res;
+        };
+
+        // ------------------ ADMIN PANEL ------------------
+
+        function checkAdmin() {
+            if(admins.includes(userId)) {
+                document.getElementById('btn-admin-panel').style.display = 'block';
+            } else {
+                document.getElementById('btn-admin-panel').style.display = 'none';
+            }
+        }
+
+        window.openAdminPanel = () => {
+            document.getElementById('admin-panel-modal').style.display = 'block';
+            openAdminView('admin-orders');
+        };
+
+        window.openAdminView = (id) => {
+            document.querySelectorAll('.admin-section').forEach(el => el.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        };
+
+        // Admin: Buyurtmalar
+        function renderAdminOrders() {
+            const list = document.getElementById('admin-orders-list');
+            list.innerHTML = allOrders.map(o => `
+                <div class="admin-card" onclick="openOrderDetails('${o.id}')" style="cursor:pointer; border-left:4px solid var(--brand-green);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <b>#${o.orderNum}</b>
+                        <span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleString()}</span>
+                    </div>
+                    <div style="font-size:14px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
+                    <div style="font-size:14px; margin-top:5px;">📍 ${o.address}</div>
+                    <hr>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>${o.items.length} xil mahsulot</span>
+                        <span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
+                    </div>
                 </div>
             `).join('');
         }
 
-        tg.expand();
+        // Admin: Mahsulotlar
+        function renderAdminProducts() {
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = products.map(p => `
+                <div class="admin-card" style="display:flex; gap:10px; align-items:center;">
+                    <img src="${p.img || 'https://via.placeholder.com/50'}" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
+                    <div style="flex:1;">
+                        <b style="display:block; font-size:15px;">${p.name}</b>
+                        <span style="color:var(--brand-green); font-weight:bold;">${Number(p.price).toLocaleString()} so'm</span>
+                    </div>
+                    <div>
+                        <button style="background:#007aff; color:white; border:none; padding:8px 12px; border-radius:8px; margin-bottom:5px; width:100%;" onclick="editProduct('${p.id}')">✏️</button>
+                        <button style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:8px; width:100%;" onclick="askDelete('${p.id}')">🗑</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.saveProduct = async () => {
+            let id = document.getElementById('ap-id').value;
+            let data = {
+                name: document.getElementById('ap-name').value,
+                price: Number(document.getElementById('ap-price').value),
+                img: document.getElementById('ap-img').value,
+                cat: document.getElementById('ap-cat').value,
+                desc: document.getElementById('ap-desc').value
+            };
+            if(!data.name || !data.price) return alert("Nomi va narxini kiriting");
+
+            if(id) await updateDoc(doc(db, "products", id), data);
+            else await addDoc(collection(db, "products"), data);
+            
+            tg.showAlert("Muvaffaqiyatli saqlandi!");
+            resetAdminForm();
+            openAdminView('admin-prods');
+        };
+
+        window.editProduct = (id) => {
+            let p = products.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('ap-id').value = p.id;
+            document.getElementById('ap-name').value = p.name;
+            document.getElementById('ap-price').value = p.price;
+            document.getElementById('ap-img').value = p.img;
+            document.getElementById('ap-cat').value = p.cat;
+            document.getElementById('ap-desc').value = p.desc || "";
+            document.getElementById('form-title').innerText = "Mahsulotni tahrirlash";
+            openAdminView('admin-add-prod');
+        };
+
+        window.resetAdminForm = () => {
+            document.getElementById('ap-id').value = "";
+            document.getElementById('ap-name').value = "";
+            document.getElementById('ap-price').value = "";
+            document.getElementById('ap-img').value = "";
+            document.getElementById('ap-desc').value = "";
+            document.getElementById('form-title').innerText = "Yangi mahsulot";
+            openAdminView('admin-prods');
+        };
+
+        // Custom Tasdiqlash
+        let deleteTargetId = null;
+        window.askDelete = (id) => {
+            deleteTargetId = id;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        };
+        window.closeConfirm = () => {
+            deleteTargetId = null;
+            document.getElementById('confirm-modal').style.display = 'none';
+        };
+        document.getElementById('confirm-yes-btn').onclick = async () => {
+            if(deleteTargetId) {
+                await deleteDoc(doc(db, "products", deleteTargetId));
+                closeConfirm();
+            }
+        };
+
+        // Admin: Adminlar boshqaruvi
+        function renderAdminUsers() {
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = admins.map(a => `
+                <div class="list-card" style="padding:10px 15px;">
+                    <b>ID: ${a}</b>
+                    ${a !== "5630950142" ? `<button style="background:none; border:none; color:var(--red); font-size:20px; font-weight:bold; cursor:pointer;" onclick="removeAdmin('${a}')">✕</button>` : `<span style="color:var(--brand-green); font-size:12px;">Asosiy</span>`}
+                </div>
+            `).join('');
+        }
+
+        window.addAdmin = async () => {
+            let id = document.getElementById('new-admin-id').value.trim();
+            if(!id) return;
+            if(admins.includes(id)) return alert("Bu ID allaqachon admin!");
+            let newList = [...admins, id];
+            await setDoc(doc(db, "settings", "admins"), { list: newList });
+            document.getElementById('new-admin-id').value = "";
+        };
+
+        window.removeAdmin = async (id) => {
+            let newList = admins.filter(a => a !== id);
+            await setDoc(doc(db, "settings", "admins"), { list: newList });
+        };
+
+        // ------------------ UI YORDAMCHI FUNKSIYALAR ------------------
+
+        window.switchTab = (tabId, el) => {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(tabId + '-view').classList.add('active');
+            
+            // Top header ko'rinishini sozlash
+            document.getElementById('main-header').style.display = (tabId === 'menu') ? 'flex' : 'none';
+            
+            if(tabId === 'cart') renderCart();
+        };
+
+        window.openProductModal = (id) => {
+            let p = products.find(x => x.id === id);
+            if(!p) return;
+            
+            document.getElementById('pm-img').src = p.img || 'https://via.placeholder.com/400';
+            document.getElementById('pm-name').innerText = p.name;
+            document.getElementById('pm-price').innerText = Number(p.price).toLocaleString() + " so'm";
+            document.getElementById('pm-desc').innerText = p.desc || "Ushbu mahsulot uchun tavsif kiritilmagan.";
+            
+            const q = cart[p.id]?.qty || 0;
+            const actionDiv = document.getElementById('pm-action');
+            
+            if(q > 0) {
+                actionDiv.innerHTML = `<div class="counter" style="min-width:110px;"><button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="updateCart('${p.id}',1)">+</button></div>`;
+            } else {
+                actionDiv.innerHTML = `<button class="main-btn" style="margin:0; padding:10px 20px; border-radius:10px;" onclick="updateCart('${p.id}',1)">Savatga</button>`;
+            }
+            
+            document.getElementById('product-modal').style.display = 'block';
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
+        };
+
     </script>
 </body>
 </html>
