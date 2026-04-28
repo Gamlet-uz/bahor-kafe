@@ -112,7 +112,10 @@
         </div>
 
         <div id="orders-view" class="view">
-            <h2 style="margin-top:0;">Buyurtmalarim</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h2 style="margin:0;">Buyurtmalarim</h2>
+                <button onclick="clearMyOrders()" style="background:none; border:none; color:var(--red); font-size:24px; cursor:pointer;" title="Barcha buyurtmalarni tozalash">🗑</button>
+            </div>
             <div id="my-orders-list"></div>
         </div>
 
@@ -158,7 +161,7 @@
         </div>
     </div>
 
-    <div id="order-detail-modal" class="full-modal">
+    <div id="order-detail-modal" class="full-modal" style="z-index: 2010;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('order-detail-modal')">←</button>
             <span>Buyurtma tavsiloti</span>
@@ -166,7 +169,7 @@
         <div style="padding: 15px;" id="od-content"></div>
     </div>
 
-    <div id="profile-edit-modal" class="full-modal" style="background: white;">
+    <div id="profile-edit-modal" class="full-modal" style="background: white; z-index: 2010;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('profile-edit-modal')">←</button>
             <span>Profilni tahrirlash</span>
@@ -176,7 +179,7 @@
             <input type="text" id="edit-name" class="input-style" placeholder="Ismingiz">
             <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Telefon raqam (+998)</label>
             <input type="tel" id="edit-phone" class="input-style" placeholder="70 015 12 23" oninput="formatPhone(this)" maxlength="12">
-            <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Tug'ilgan sana</label>
+            <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Tug'ilgan sana (Majburiy emas)</label>
             <input type="text" id="edit-dob" class="input-style" placeholder="31/12/2000" oninput="formatDOB(this)" maxlength="10">
             <button class="main-btn" onclick="saveProfile()">Saqlash</button>
         </div>
@@ -191,7 +194,7 @@
             <h2 style="text-align:center; margin-top:0;">Umumiy narx: <br><span id="checkout-total" style="color:var(--brand-green);">0 so'm</span></h2>
             
             <label style="font-weight:bold; color:var(--gray); margin-top:20px; display:block;">Buyurtma olib ketish joyi (Manzil):</label>
-            <button class="main-btn" style="background:#e0e0e0; color:#333; padding:12px; margin: 10px 0; font-size: 15px;" onclick="getLocation()">📍 Joylashuvimni aniqlash (GPS)</button>
+            <button class="main-btn" style="background:#e0e0e0; color:#333; padding:12px; margin: 10px 0; font-size: 15px;" onclick="getLocation()">📍 Joylashuvimni aniqlash (Avtomatik tasdiqlash)</button>
             <textarea id="checkout-address" class="input-style" placeholder="Shahar, ko'cha, uy raqami yoki mo'ljal..."></textarea>
             
             <button class="main-btn" onclick="submitOrder()">Tasdiqlash va Yuborish</button>
@@ -484,6 +487,18 @@
             `).join('');
         };
 
+        window.clearMyOrders = () => {
+            if (myOrders.length === 0) return tg.showAlert("Buyurtmalar ro'yxati bo'sh!");
+            tg.showConfirm("Barcha buyurtmalaringizni o'chirib tashlaysizmi?", (ok) => {
+                if (ok) {
+                    myOrders.forEach(async o => {
+                        await deleteDoc(doc(db, "orders", o.id));
+                    });
+                    tg.showAlert("Barcha buyurtmalar tozalandi!");
+                }
+            });
+        };
+
         window.openOrderDetails = (orderId) => {
             let o = allOrders.find(x => x.id === orderId);
             if(!o) return;
@@ -496,7 +511,7 @@
                     ${o.userId !== userId ? `
                         <div class="p-row"><b>Mijoz:</b> <span>${o.userName}</span></div>
                         <div class="p-row"><b>Telefon:</b> <span>${o.phone}</span></div>
-                        <div class="p-row"><b>Yosh:</b> <span>${o.dob}</span></div>
+                        <div class="p-row"><b>Tug'ilgan sana:</b> <span>${o.dob}</span></div>
                     ` : ''}
                 </div>
                 <h3 style="margin-top:20px;">Mahsulotlar:</h3>
@@ -525,9 +540,12 @@
                     (position) => {
                         let lat = position.coords.latitude;
                         let lon = position.coords.longitude;
-                        let mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                        let mapLink = `https://maps.google.com/?q=${lat},${lon}`;
                         let addrInput = document.getElementById('checkout-address');
-                        addrInput.value = (addrInput.value ? addrInput.value + "\n" : "") + "📍 GPS Joylashuv: " + mapLink;
+                        
+                        addrInput.value = "📍 GPS Joylashuv: " + mapLink;
+                        // GPS Olingach, avtomatik davom ettirish
+                        submitOrder();
                     },
                     (error) => {
                         tg.showAlert("Joylashuvni aniqlab bo'lmadi yoki ruxsat berilmadi.");
@@ -540,6 +558,17 @@
         };
 
         window.openCheckout = () => {
+            // Majburiy profil tekshiruvi
+            if (!userData.phone || userData.phone.replace(/\D/g, '').length < 9 || !userName || userName === "Foydalanuvchi") {
+                tg.showAlert("Iltimos, buyurtma berishdan oldin profilingizni (Ism va Telefon raqam) to'ldiring!");
+                switchTab('profile', document.querySelectorAll('.nav-item')[3]);
+                openProfileEdit();
+                return;
+            }
+
+            // Har ochilganda manzilni tozalash (yangi kiritish uchun)
+            document.getElementById('checkout-address').value = "";
+
             let total = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
             document.getElementById('checkout-total').innerText = total.toLocaleString() + " so'm";
             document.getElementById('checkout-modal').style.display = 'block';
@@ -592,6 +621,10 @@
             userData.phone = document.getElementById('edit-phone').value;
             userData.dob = document.getElementById('edit-dob').value;
             
+            if (!userName || !userData.phone) {
+                return tg.showAlert("Ism va Telefon raqam kiritilishi shart!");
+            }
+
             await setDoc(doc(db, "users", userId), { name: userName, phone: userData.phone, dob: userData.dob }, {merge:true});
             updateProfileView();
             closeModal('profile-edit-modal');
