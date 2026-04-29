@@ -162,7 +162,7 @@
         </div>
     </div>
 
-    <div id="order-detail-modal" class="full-modal">
+    <div id="order-detail-modal" class="full-modal" style="z-index: 9999;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('order-detail-modal')">←</button>
             <span>Buyurtma tavsiloti</span>
@@ -582,13 +582,30 @@
             }
         };
 
+        // Buyurtma berishdan oldin qat'iy tekshiruv
         window.openCheckout = () => {
+            let rawPhone = userData.phone ? userData.phone.replace(/\D/g, '') : '';
+            if (!rawPhone || rawPhone.length < 9 || !userName || userName.trim() === "" || userName === "Foydalanuvchi") {
+                tg.showAlert("Iltimos, buyurtma berishdan oldin profilingizni (Ism va Telefon raqam) to'liq kiriting!");
+                switchTab('profile', document.querySelectorAll('.nav-item')[3]);
+                openProfileEdit();
+                return;
+            }
+
+            document.getElementById('checkout-address').value = ""; // Oynani har ochganda manzil tozalanadi
+
             let total = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
             document.getElementById('checkout-total').innerText = total.toLocaleString() + " so'm";
             document.getElementById('checkout-modal').style.display = 'block';
         };
 
+        // Yuborishda yakuniy tekshiruv
         window.submitOrder = async () => {
+            let rawPhone = userData.phone ? userData.phone.replace(/\D/g, '') : '';
+            if (!rawPhone || rawPhone.length < 9 || !userName || userName.trim() === "" || userName === "Foydalanuvchi") {
+                return tg.showAlert("Profil ma'lumotlari to'liq emas! Iltimos, ismingiz va raqamingizni kiriting.");
+            }
+
             let address = document.getElementById('checkout-address').value.trim();
             if(!address) return tg.showAlert("Iltimos, manzilni kiriting yoki joylashuvni aniqlash tugmasini bosing!");
             
