@@ -329,14 +329,13 @@
 
         // ------------------ FIREBASE ULANISHI ------------------
 
-        // Kategoriyalarni bazadan olish
+        // XATO BARTARAF ETILDI: Kategoriyalarni bazadan olish
         onSnapshot(doc(db, "settings", "categories"), (docSnap) => {
             if (docSnap.exists()) {
                 categories = ["Hammasi", ...docSnap.data().list];
             } else {
-                let defaultCats = ["Lavash", "Hot-dog", "Burger", "Ichimliklar"];
-                setDoc(doc(db, "settings", "categories"), { list: defaultCats });
-                categories = ["Hammasi", ...defaultCats];
+                // Agar baza bo'sh bo'lsa, xato qilib standart ma'lumotlarni yozib yubormaydi
+                categories = ["Hammasi"];
             }
             renderCategoriesUI();
             if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminCategories();
