@@ -32,7 +32,8 @@
         .product-card { background: white; border-radius: 16px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
         .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; cursor: pointer; }
         .p-title { font-weight: bold; font-size: 15px; margin: 8px 0 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .p-price { color: var(--brand-green); font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+        .p-price { color: var(--brand-green); font-weight: 800; font-size: 14px; margin-bottom: 0px; }
+        .p-stock { font-size: 12px; font-weight: bold; }
         .add-btn { width: 100%; background: #f0f0f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; margin-top: auto; cursor: pointer; }
         .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 10px; margin-top: auto; }
         .btn-m { background: none; border: none; color: white; font-size: 18px; padding: 8px 15px; font-weight: bold; cursor: pointer; }
@@ -103,8 +104,7 @@
     <div class="view-container">
         
         <div id="menu-view" class="view active">
-            <div class="cats-wrapper" id="cats-container" style="margin: -15px -15px 15px -15px;">
-                </div>
+            <div class="cats-wrapper" id="cats-container" style="margin: -15px -15px 15px -15px;"></div>
             <div id="products-list" class="products-grid"></div>
         </div>
 
@@ -209,17 +209,27 @@
         </div>
         <div style="padding: 15px;">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-orders')">📦 Buyurtmalar</div>
-                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-prods')">🍔 Mahsulotlar</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-orders')">📦 Buyurtma</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-prods')">🍔 Mahsulot</div>
                 <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-add-prod')">➕ Qo'shish</div>
-                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-cats')">📁 Kategoriyalar</div>
-                <div class="admin-card" style="text-align:center; cursor:pointer; grid-column: span 2;" onclick="openAdminView('admin-users')">🛡 Adminlar</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-cats')">📁 Kategoriya</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-users')">🛡 Adminlar</div>
+                <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-settings')">⚙️ Sozlamalar</div>
+            </div>
+
+            <div id="admin-settings" class="admin-section" style="display:none;">
+                <h3>Umumiy Sozlamalar</h3>
+                <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Minimal buyurtma miqdori (so'm)</label>
+                <input type="number" id="as-min-order" class="input-style" placeholder="50000">
+                <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Ustama narx (Xizmat haqi %)</label>
+                <input type="number" id="as-fee-percent" class="input-style" placeholder="1">
+                <button class="main-btn" onclick="saveGlobalSettings()">Saqlash</button>
             </div>
 
             <div id="admin-orders" class="admin-section">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0;">Kelib tushgan buyurtmalar</h3>
-                    <button class="danger-btn" style="width: auto; padding: 8px 15px; margin: 0; font-size: 14px;" onclick="clearAllOrdersAdmin()">Barchasini tozalash</button>
+                    <button class="danger-btn" style="width: auto; padding: 8px 15px; margin: 0; font-size: 14px;" onclick="clearAllOrdersAdmin()">Tozalash</button>
                 </div>
                 <div id="admin-orders-list"></div>
             </div>
@@ -234,9 +244,9 @@
                 <input type="hidden" id="ap-id">
                 <input type="text" id="ap-name" class="input-style" placeholder="Nomi">
                 <input type="number" id="ap-price" class="input-style" placeholder="Narxi (so'm)">
+                <input type="text" id="ap-count" class="input-style" placeholder="Soni (Cheksiz uchun # qoldiring)">
                 <input type="text" id="ap-img" class="input-style" placeholder="Rasm linki (URL)">
-                <select id="ap-cat" class="input-style">
-                    </select>
+                <select id="ap-cat" class="input-style"></select>
                 <textarea id="ap-desc" class="input-style" placeholder="Tavsif..."></textarea>
                 <button class="main-btn" onclick="saveProduct()">Saqlash</button>
                 <button class="danger-btn" style="background:#8e8e93;" onclick="resetAdminForm()">Bekor qilish</button>
@@ -245,7 +255,7 @@
             <div id="admin-cats" class="admin-section" style="display:none;">
                 <h3>Kategoriyalarni boshqarish</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="new-cat-input" class="input-style" style="margin:0;" placeholder="Yangi kategoriya nomi">
+                    <input type="text" id="new-cat-input" class="input-style" style="margin:0;" placeholder="Kategoriya nomi">
                     <button class="main-btn" style="margin:0; width:100px;" onclick="addCategory()">Qo'shish</button>
                 </div>
                 <div id="admin-cats-list"></div>
@@ -296,7 +306,6 @@
         let userId = tg.initDataUnsafe?.user?.id?.toString() || "123456789"; 
         let userName = tg.initDataUnsafe?.user?.first_name || "Foydalanuvchi";
         
-        // Global Holatlar
         let products = [];
         let filteredProducts = [];
         let cart = {};
@@ -307,8 +316,9 @@
         let currentCat = "Hammasi";
         let searchQuery = "";
         let userData = { phone: "", dob: "" };
+        let globalSettings = { minOrder: 0, feePercent: 0 };
 
-        // ------------------ UNIVERSAL CONFIRM LOGIKASI ------------------
+        // CONFIRM MODAL
         let confirmAction = null;
         window.askConfirm = (title, desc, onYes) => {
             document.getElementById('confirm-title').innerText = title;
@@ -321,22 +331,27 @@
             document.getElementById('confirm-modal').style.display = 'none';
         };
         document.getElementById('confirm-yes-btn').onclick = async () => {
-            if(confirmAction) {
-                await confirmAction();
-                closeConfirm();
-            }
+            if(confirmAction) { await confirmAction(); closeConfirm(); }
         };
 
-        // ------------------ FIREBASE ULANISHI ------------------
-
-        // XATO BARTARAF ETILDI: Kategoriyalarni bazadan olish
-        onSnapshot(doc(db, "settings", "categories"), (docSnap) => {
+        // FIREBASE ULANISHLARI
+        
+        // Umumiy sozlamalar (Minimal narx va Ustama)
+        onSnapshot(doc(db, "settings", "general"), (docSnap) => {
             if (docSnap.exists()) {
-                categories = ["Hammasi", ...docSnap.data().list];
+                globalSettings = docSnap.data();
             } else {
-                // Agar baza bo'sh bo'lsa, xato qilib standart ma'lumotlarni yozib yubormaydi
-                categories = ["Hammasi"];
+                globalSettings = { minOrder: 50000, feePercent: 0 };
             }
+            document.getElementById('as-min-order').value = globalSettings.minOrder;
+            document.getElementById('as-fee-percent').value = globalSettings.feePercent;
+            renderCart();
+        });
+
+        // Kategoriyalar
+        onSnapshot(doc(db, "settings", "categories"), (docSnap) => {
+            if (docSnap.exists()) categories = ["Hammasi", ...docSnap.data().list];
+            else categories = ["Hammasi"];
             renderCategoriesUI();
             if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminCategories();
         });
@@ -349,32 +364,28 @@
             if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminProducts();
         });
 
-        // Buyurtmalar (Hammasi + Mijoz)
+        // Buyurtmalar
         onSnapshot(query(collection(db, "orders"), orderBy("date", "desc")), (snap) => {
             allOrders = [];
             myOrders = [];
             snap.forEach(d => {
                 let order = {id: d.id, ...d.data()};
                 allOrders.push(order);
-                // Mijoz ro'yxatiga faqat yashirilmaganlarini qo'shamiz
                 if(order.userId === userId && !order.hideForUser) myOrders.push(order);
             });
             renderMyOrders();
             if(document.getElementById('admin-panel-modal').style.display === 'block') renderAdminOrders();
         });
 
-        // Adminlar ro'yxati
+        // Adminlar
         onSnapshot(doc(db, "settings", "admins"), (docSnap) => {
-            if (docSnap.exists()) {
-                admins = docSnap.data().list || admins;
-            } else {
-                setDoc(doc(db, "settings", "admins"), { list: admins });
-            }
+            if (docSnap.exists()) admins = docSnap.data().list || admins;
+            else setDoc(doc(db, "settings", "admins"), { list: admins });
             checkAdmin();
             renderAdminUsers();
         });
 
-        // Foydalanuvchi profili
+        // Profil
         getDoc(doc(db, "users", userId)).then(docSnap => {
             if(docSnap.exists()) {
                 let data = docSnap.data();
@@ -385,30 +396,20 @@
             updateProfileView();
         });
 
-        // ------------------ MENYU VA MAHSULOTLAR ------------------
-
+        // UI FUNKSIYALARI
         function renderCategoriesUI() {
             const container = document.getElementById('cats-container');
             container.innerHTML = categories.map(cat => 
                 `<button class="cat-btn ${currentCat === cat ? 'active' : ''}" onclick="setCategory('${cat}')">${cat}</button>`
             ).join('');
-
             const select = document.getElementById('ap-cat');
             select.innerHTML = categories.filter(c => c !== 'Hammasi').map(cat => 
                 `<option value="${cat}">${cat}</option>`
             ).join('');
         }
 
-        window.setCategory = (cat) => {
-            currentCat = cat;
-            renderCategoriesUI(); 
-            applyFilters();
-        };
-
-        window.filterProducts = () => {
-            searchQuery = document.getElementById('search-input').value.toLowerCase();
-            applyFilters();
-        };
+        window.setCategory = (cat) => { currentCat = cat; renderCategoriesUI(); applyFilters(); };
+        window.filterProducts = () => { searchQuery = document.getElementById('search-input').value.toLowerCase(); applyFilters(); };
 
         function applyFilters() {
             filteredProducts = products.filter(p => {
@@ -423,30 +424,53 @@
             const list = document.getElementById('products-list');
             list.innerHTML = filteredProducts.map(p => {
                 const q = cart[p.id]?.qty || 0;
+                let stockVal = p.count || '#';
+                let isInfinity = stockVal === '#';
+                let stockNum = isInfinity ? Infinity : Number(stockVal);
+                let isOut = !isInfinity && stockNum <= 0;
+
                 return `
-                <div class="product-card">
+                <div class="product-card" style="${isOut ? 'opacity:0.6;' : ''}">
                     <img src="${p.img || 'https://via.placeholder.com/300'}" onclick="openProductModal('${p.id}')">
                     <div class="p-title">${p.name}</div>
-                    <div class="p-price">${Number(p.price).toLocaleString()} so'm</div>
-                    ${q > 0 ? `<div class="counter"><button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="updateCart('${p.id}',1)">+</button></div>` 
-                            : `<button class="add-btn" onclick="updateCart('${p.id}',1)">Savatga</button>`}
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div class="p-price">${Number(p.price).toLocaleString()} so'm</div>
+                        <div class="p-stock" style="color:${isOut ? 'var(--red)' : 'var(--gray)'}">
+                            ${isOut ? 'Tugagan' : (isInfinity ? '∞' : stockNum + ' ta')}
+                        </div>
+                    </div>
+
+                    ${isOut 
+                        ? `<button class="add-btn" disabled style="background:#ccc; color:#666;">Sotib bo'lingan</button>`
+                        : (q > 0 
+                            ? `<div class="counter"><button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="updateCart('${p.id}',1)">+</button></div>` 
+                            : `<button class="add-btn" onclick="updateCart('${p.id}',1)">Savatga</button>`)
+                    }
                 </div>`;
             }).join('');
             updateBadge();
         };
 
-        // ------------------ SAVAT (CART) LOGIKASI ------------------
-
         window.updateCart = (id, delta) => {
-            if(!cart[id]) cart[id] = {...products.find(x=>x.id===id), qty:0};
-            cart[id].qty += delta;
+            let p = products.find(x => x.id === id);
+            if(!p) return;
+            if(!cart[id]) cart[id] = {...p, qty:0};
+            
+            let newQty = cart[id].qty + delta;
+            let isInfinity = (p.count || '#') === '#';
+            let stockNum = isInfinity ? Infinity : Number(p.count);
+
+            if (delta > 0 && newQty > stockNum) {
+                return tg.showAlert(`Kechirasiz, omborda faqat ${stockNum} ta bor.`);
+            }
+
+            cart[id].qty = newQty;
             if(cart[id].qty <= 0) delete cart[id];
             
             renderMenu();
             renderCart();
-            if(document.getElementById('product-modal').style.display === 'block') {
-                openProductModal(id); 
-            }
+            if(document.getElementById('product-modal').style.display === 'block') openProductModal(id); 
         };
 
         function updateBadge() {
@@ -464,7 +488,13 @@
                 return; 
             }
             
-            let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
+            let subtotal = items.reduce((a, b) => a + (b.price * b.qty), 0);
+            let feePercent = Number(globalSettings.feePercent || 0);
+            let feeAmount = Math.round(subtotal * (feePercent / 100));
+            let finalTotal = subtotal + feeAmount;
+            
+            let minOrder = Number(globalSettings.minOrder || 0);
+            let isMinMet = finalTotal >= minOrder;
             
             container.innerHTML = items.map(p => `
                 <div class="list-card">
@@ -480,16 +510,28 @@
                 </div>
             `).join('') + `
             <div style="margin-top:20px; padding:15px; background:white; border-radius:16px;">
-                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; margin-bottom:15px;">
-                    <span>Jami:</span>
-                    <span>${total.toLocaleString()} so'm</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:var(--gray); font-size:14px;">
+                    <span>Mahsulotlar narxi:</span>
+                    <span>${subtotal.toLocaleString()} so'm</span>
                 </div>
-                <button class="main-btn" style="margin:0;" onclick="openCheckout()">Buyurtma berish</button>
+                ${feePercent > 0 ? `
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:var(--gray); font-size:14px;">
+                    <span>Xizmat haqi (${feePercent}%):</span>
+                    <span>+${feeAmount.toLocaleString()} so'm</span>
+                </div>` : ''}
+                <hr style="border:none; border-top:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; margin-top:10px; margin-bottom:15px;">
+                    <span>Jami:</span>
+                    <span>${finalTotal.toLocaleString()} so'm</span>
+                </div>
+                
+                ${!isMinMet ? `<p style="color:red; font-size:12px; text-align:center;">Minimal xarid: ${minOrder.toLocaleString()} so'm</p>` : ''}
+                
+                <button class="main-btn" style="margin:0;" onclick="openCheckout()" ${!isMinMet ? 'disabled' : ''}>Buyurtma berish</button>
             </div>`;
         };
 
-        // ------------------ BUYURTMALAR (MIJOZ) ------------------
-
+        // BUYURTMALAR
         window.renderMyOrders = () => {
             const list = document.getElementById('my-orders-list');
             if(myOrders.length === 0) {
@@ -510,7 +552,6 @@
         window.openOrderDetails = (orderId) => {
             let o = allOrders.find(x => x.id === orderId);
             if(!o) return;
-            
             let html = `
                 <div class="p-info-box">
                     <div class="p-row"><b>Buyurtma raqami:</b> <span>#${o.orderNum}</span></div>
@@ -519,16 +560,12 @@
                     ${o.userId !== userId ? `
                         <div class="p-row"><b>Mijoz:</b> <span>${o.userName}</span></div>
                         <div class="p-row"><b>Telefon:</b> <span>${o.phone}</span></div>
-                        <div class="p-row"><b>Tug'ilgan:</b> <span>${o.dob}</span></div>
                     ` : ''}
                 </div>
                 <h3 style="margin-top:20px;">Mahsulotlar:</h3>
                 <div class="p-info-box">
                     ${o.items.map(i => `
-                        <div class="p-row">
-                            <span>${i.name} (${i.qty}x)</span>
-                            <span>${(i.price * i.qty).toLocaleString()} so'm</span>
-                        </div>
+                        <div class="p-row"><span>${i.name} (${i.qty}x)</span><span>${(i.price * i.qty).toLocaleString()} so'm</span></div>
                     `).join('')}
                     <div class="p-row" style="border-top:2px solid #eee; margin-top:10px;">
                         <b>Jami:</b> <span style="color:var(--brand-green); font-size:18px;">${Number(o.total).toLocaleString()} so'm</span>
@@ -539,135 +576,116 @@
             document.getElementById('order-detail-modal').style.display = 'block';
         };
 
-        // Mijoz uchun tarixni tozalash
         window.clearMyOrders = () => {
-            if(myOrders.length === 0) return tg.showAlert("Buyurtmalar ro'yxati shundoq ham bo'sh!");
-            askConfirm("Tarixni tozalash", "Barcha buyurtmalaringiz tarixini o'chirmoqchimisiz?", async () => {
-                for(let o of myOrders) {
-                    await updateDoc(doc(db, "orders", o.id), { hideForUser: true });
-                }
-                tg.showAlert("Buyurtmalar tarixi tozalandi.");
+            if(myOrders.length === 0) return tg.showAlert("Ro'yxat shundoq ham bo'sh!");
+            askConfirm("Tozalash", "Buyurtmalar tarixingizni o'chirmoqchimisiz?", async () => {
+                for(let o of myOrders) await updateDoc(doc(db, "orders", o.id), { hideForUser: true });
+                tg.showAlert("Tarix tozalandi.");
             });
         };
 
-        // ------------------ JOYLASHUV VA YUBORISH ------------------
-
+        // JOYLASHUV VA CHECKOUT
         window.getLocation = () => {
             const btn = document.getElementById('btn-location');
             if (navigator.geolocation) {
-                btn.innerText = "⏳ Joylashuv aniqlanmoqda...";
-                btn.disabled = true;
-                
+                btn.innerText = "⏳ Aniqlanmoqda..."; btn.disabled = true;
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        let lat = position.coords.latitude;
-                        let lon = position.coords.longitude;
-                        let mapLink = `https://maps.google.com/maps?q=${lat},${lon}`;
-                        let addrInput = document.getElementById('checkout-address');
-                        addrInput.value = (addrInput.value ? addrInput.value + "\n" : "") + "📍 GPS Joylashuv: " + mapLink;
-                        
-                        btn.innerText = "📍 Joylashuvimni aniqlash (GPS)";
-                        btn.disabled = false;
+                    (pos) => {
+                        let link = `https://maps.google.com/maps?q=$${pos.coords.latitude},${pos.coords.longitude}`;
+                        let el = document.getElementById('checkout-address');
+                        el.value = (el.value ? el.value + "\n" : "") + "📍 GPS: " + link;
+                        btn.innerText = "📍 Joylashuvni aniqlash"; btn.disabled = false;
                     },
-                    (error) => {
-                        tg.showAlert("Joylashuvni aniqlab bo'lmadi yoki ruxsat berilmadi.");
-                        btn.innerText = "📍 Joylashuvimni aniqlash (GPS)";
-                        btn.disabled = false;
-                    },
+                    (err) => { tg.showAlert("Joylashuv aniqlanmadi"); btn.innerText = "📍 Joylashuvni aniqlash"; btn.disabled = false; },
                     { enableHighAccuracy: true }
                 );
-            } else {
-                tg.showAlert("Qurilmangiz joylashuvni qo'llab-quvvatlamaydi.");
             }
         };
 
-        // Buyurtma berishdan oldin qat'iy tekshiruv
         window.openCheckout = () => {
             let rawPhone = userData.phone ? userData.phone.replace(/\D/g, '') : '';
             if (!rawPhone || rawPhone.length < 9 || !userName || userName.trim() === "" || userName === "Foydalanuvchi") {
-                tg.showAlert("Iltimos, buyurtma berishdan oldin profilingizni (Ism va Telefon raqam) to'liq kiriting!");
+                tg.showAlert("Iltimos, ismingiz va telefon raqamingizni kiriting!");
                 switchTab('profile', document.querySelectorAll('.nav-item')[3]);
-                openProfileEdit();
-                return;
+                openProfileEdit(); return;
             }
 
-            document.getElementById('checkout-address').value = ""; // Oynani har ochganda manzil tozalanadi
+            let subtotal = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
+            let feeAmount = Math.round(subtotal * (Number(globalSettings.feePercent || 0) / 100));
+            let total = subtotal + feeAmount;
 
-            let total = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
+            document.getElementById('checkout-address').value = ""; 
             document.getElementById('checkout-total').innerText = total.toLocaleString() + " so'm";
             document.getElementById('checkout-modal').style.display = 'block';
         };
 
-        // Yuborishda yakuniy tekshiruv
         window.submitOrder = async () => {
-            let rawPhone = userData.phone ? userData.phone.replace(/\D/g, '') : '';
-            if (!rawPhone || rawPhone.length < 9 || !userName || userName.trim() === "" || userName === "Foydalanuvchi") {
-                return tg.showAlert("Profil ma'lumotlari to'liq emas! Iltimos, ismingiz va raqamingizni kiriting.");
-            }
-
             let address = document.getElementById('checkout-address').value.trim();
-            if(!address) return tg.showAlert("Iltimos, manzilni kiriting yoki joylashuvni aniqlash tugmasini bosing!");
+            if(!address) return tg.showAlert("Manzilni kiriting!");
             
             let btn = document.getElementById('btn-submit-order');
-            btn.disabled = true;
-            btn.innerText = "⏳ Yuborilmoqda...";
+            btn.disabled = true; btn.innerText = "⏳ Yuborilmoqda...";
             
             try {
-                let items = Object.values(cart).map(i => ({ name: i.name, qty: i.qty, price: i.price }));
-                let total = items.reduce((a, b) => a + (b.price * b.qty), 0);
+                let items = Object.values(cart).map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price }));
+                let subtotal = items.reduce((a, b) => a + (b.price * b.qty), 0);
+                let feePercent = Number(globalSettings.feePercent || 0);
+                let feeAmount = Math.round(subtotal * (feePercent / 100));
+                let total = subtotal + feeAmount;
+                
                 let orderNum = Math.floor(10000 + Math.random() * 90000); 
                 
                 let orderObj = {
                     orderNum, userId, userName,
-                    phone: userData.phone, dob: userData.dob,
-                    address, items, total,
-                    date: Date.now(),
-                    hideForUser: false
+                    phone: userData.phone, address, items, total,
+                    feePercent, feeAmount, subtotal,
+                    date: Date.now(), hideForUser: false
                 };
 
+                // Firebasega buyurtmani qo'shish
                 await addDoc(collection(db, "orders"), orderObj);
+                
+                // Ombordan ayirish
+                for(let item of items) {
+                    let p = products.find(x => x.id === item.id);
+                    if(p && (p.count || '#') !== '#') {
+                        let newCount = Number(p.count) - item.qty;
+                        await updateDoc(doc(db, "products", p.id), { count: newCount.toString() });
+                    }
+                }
+
+                // Telegram Botga yuborish (Xabar berish uchun)
                 tg.sendData(JSON.stringify({ action: "new_order", ...orderObj }));
                 
-                cart = {}; 
-                renderMenu();
-                renderCart();
-                closeModal('checkout-modal');
+                cart = {}; renderMenu(); renderCart(); closeModal('checkout-modal');
                 switchTab('orders', document.querySelectorAll('.nav-item')[2]);
-                tg.showAlert("Buyurtmangiz qabul qilindi! Raqam: #" + orderNum);
+                tg.showAlert("Qabul qilindi! Raqam: #" + orderNum);
             } catch (error) {
-                tg.showAlert("Xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.");
+                tg.showAlert("Xatolik yuz berdi.");
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Tasdiqlash va Yuborish";
-                document.getElementById('checkout-address').value = "";
+                btn.disabled = false; btn.innerText = "Tasdiqlash va Yuborish";
             }
         };
 
-        // ------------------ PROFIL ------------------
-
+        // PROFIL
         function updateProfileView() {
             document.getElementById('prof-name').innerText = userName;
             document.getElementById('prof-phone').innerText = userData.phone ? "+998 " + userData.phone : "Kiritilmagan";
             document.getElementById('prof-dob').innerText = userData.dob || "Kiritilmagan";
         }
-
         window.openProfileEdit = () => {
             document.getElementById('edit-name').value = userName;
             document.getElementById('edit-phone').value = userData.phone;
             document.getElementById('edit-dob').value = userData.dob;
             document.getElementById('profile-edit-modal').style.display = 'block';
         };
-
         window.saveProfile = async () => {
             userName = document.getElementById('edit-name').value;
             userData.phone = document.getElementById('edit-phone').value;
             userData.dob = document.getElementById('edit-dob').value;
-            
             await setDoc(doc(db, "users", userId), { name: userName, phone: userData.phone, dob: userData.dob }, {merge:true});
-            updateProfileView();
-            closeModal('profile-edit-modal');
+            updateProfileView(); closeModal('profile-edit-modal');
         };
-
         window.formatPhone = (el) => {
             let val = el.value.replace(/\D/g, '').substring(0,9);
             let res = "";
@@ -686,14 +704,10 @@
             el.value = res;
         };
 
-        // ------------------ ADMIN PANEL ------------------
-
+        // ADMIN PANEL
         function checkAdmin() {
-            if(admins.includes(userId)) {
-                document.getElementById('btn-admin-panel').style.display = 'block';
-            } else {
-                document.getElementById('btn-admin-panel').style.display = 'none';
-            }
+            if(admins.includes(userId)) document.getElementById('btn-admin-panel').style.display = 'block';
+            else document.getElementById('btn-admin-panel').style.display = 'none';
         }
 
         window.openAdminPanel = () => {
@@ -704,128 +718,110 @@
         window.openAdminView = (id) => {
             document.querySelectorAll('.admin-section').forEach(el => el.style.display = 'none');
             document.getElementById(id).style.display = 'block';
-            
             if(id === 'admin-orders') renderAdminOrders();
             if(id === 'admin-prods') renderAdminProducts();
             if(id === 'admin-cats') renderAdminCategories();
         };
 
-        // Admin: Kategoriyalar
+        // Admin: Sozlamalar
+        window.saveGlobalSettings = async () => {
+            let min = Number(document.getElementById('as-min-order').value) || 0;
+            let fee = Number(document.getElementById('as-fee-percent').value) || 0;
+            await setDoc(doc(db, "settings", "general"), { minOrder: min, feePercent: fee });
+            tg.showAlert("Umumiy sozlamalar saqlandi!");
+        };
+
+        // Admin: Kategoriya
         window.renderAdminCategories = () => {
             const list = document.getElementById('admin-cats-list');
             let catsOnly = categories.filter(c => c !== 'Hammasi');
-            if(catsOnly.length === 0) {
-                list.innerHTML = "<p>Kategoriyalar mavjud emas.</p>";
-                return;
-            }
+            if(catsOnly.length === 0) return list.innerHTML = "<p>Mavjud emas.</p>";
             list.innerHTML = catsOnly.map(c => `
-                <div class="list-card" style="padding:10px 15px;">
-                    <b>${c}</b>
-                    <button style="background:none; border:none; color:var(--red); font-size:20px; font-weight:bold; cursor:pointer;" onclick="removeCategory('${c}')">✕</button>
-                </div>
+                <div class="list-card" style="padding:10px 15px;"><b>${c}</b><button style="background:none; border:none; color:var(--red); font-size:20px; font-weight:bold;" onclick="removeCategory('${c}')">✕</button></div>
             `).join('');
         };
-
         window.addCategory = async () => {
             let catName = document.getElementById('new-cat-input').value.trim();
-            if(!catName) return;
-            let catsOnly = categories.filter(c => c !== 'Hammasi');
-            if(catsOnly.includes(catName)) return tg.showAlert("Bu kategoriya allaqachon mavjud!");
-            
-            catsOnly.push(catName);
+            if(!catName || categories.includes(catName)) return;
+            let catsOnly = categories.filter(c => c !== 'Hammasi'); catsOnly.push(catName);
             await setDoc(doc(db, "settings", "categories"), { list: catsOnly });
-            document.getElementById('new-cat-input').value = "";
-            tg.showAlert("Kategoriya qo'shildi!");
+            document.getElementById('new-cat-input').value = ""; tg.showAlert("Qo'shildi!");
         };
-
-        window.removeCategory = async (catName) => {
-            let catsOnly = categories.filter(c => c !== 'Hammasi' && c !== catName);
+        window.removeCategory = async (c) => {
+            let catsOnly = categories.filter(x => x !== 'Hammasi' && x !== c);
             await setDoc(doc(db, "settings", "categories"), { list: catsOnly });
-            tg.showAlert("Kategoriya o'chirildi!");
         };
 
         // Admin: Buyurtmalar
         function renderAdminOrders() {
             const list = document.getElementById('admin-orders-list');
-            if(allOrders.length === 0) {
-                list.innerHTML = "<p>Hozircha buyurtmalar yo'q.</p>";
-                return;
-            }
+            if(allOrders.length === 0) return list.innerHTML = "<p>Buyurtmalar yo'q.</p>";
             list.innerHTML = allOrders.map(o => `
                 <div class="admin-card" onclick="openOrderDetails('${o.id}')" style="cursor:pointer; border-left:4px solid var(--brand-green);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <b>#${o.orderNum}</b>
-                        <span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleString()}</span>
-                    </div>
-                    <div style="font-size:14px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
-                    <div style="font-size:14px; margin-top:5px; white-space: pre-wrap;">📍 ${o.address}</div>
+                    <div style="display:flex; justify-content:space-between;"><b>#${o.orderNum}</b><span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleString()}</span></div>
+                    <div style="font-size:14px; margin-top:5px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
                     <hr>
                     <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>${o.items.length} xil mahsulot</span>
-                        <span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
+                        <span>${o.items.length} xil mahsulot</span><span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
                     </div>
                 </div>
             `).join('');
         }
-        
-        // Admin uchun barcha buyurtmalarni tozalash
         window.clearAllOrdersAdmin = () => {
-            if(allOrders.length === 0) return tg.showAlert("Buyurtmalar ro'yxati bo'sh!");
-            askConfirm("Barchasini o'chirish", "Barcha buyurtmalarni bazadan butunlay o'chirib yubormoqchimisiz? Bu amalni orqaga qaytarib bo'lmaydi.", async () => {
-                for(let o of allOrders) {
-                    await deleteDoc(doc(db, "orders", o.id));
-                }
-                tg.showAlert("Barcha buyurtmalar o'chirildi.");
+            if(allOrders.length === 0) return;
+            askConfirm("Barchasini o'chirish", "O'chirasizmi?", async () => {
+                for(let o of allOrders) await deleteDoc(doc(db, "orders", o.id));
+                tg.showAlert("O'chirildi.");
             });
         };
 
         // Admin: Mahsulotlar
         function renderAdminProducts() {
             const list = document.getElementById('admin-products-list');
-            if(products.length === 0) {
-                list.innerHTML = "<p>Mahsulotlar mavjud emas.</p>";
-                return;
-            }
-            list.innerHTML = products.map(p => `
+            if(products.length === 0) return list.innerHTML = "<p>Mahsulot yo'q.</p>";
+            list.innerHTML = products.map(p => {
+                let stock = (p.count || '#') === '#' ? '∞' : p.count + ' ta';
+                return `
                 <div class="admin-card" style="display:flex; gap:10px; align-items:center;">
                     <img src="${p.img || 'https://via.placeholder.com/50'}" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
                     <div style="flex:1;">
                         <b style="display:block; font-size:15px;">${p.name}</b>
                         <span style="color:var(--brand-green); font-weight:bold;">${Number(p.price).toLocaleString()} so'm</span>
+                        <div style="font-size:12px; color:var(--gray);">Qoldiq: ${stock}</div>
                     </div>
                     <div>
                         <button style="background:#007aff; color:white; border:none; padding:8px 12px; border-radius:8px; margin-bottom:5px; width:100%;" onclick="editProduct('${p.id}')">✏️</button>
                         <button style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:8px; width:100%;" onclick="askDelete('${p.id}')">🗑</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         window.saveProduct = async () => {
             let id = document.getElementById('ap-id').value;
+            let countVal = document.getElementById('ap-count').value.trim() || '#';
             let data = {
                 name: document.getElementById('ap-name').value,
                 price: Number(document.getElementById('ap-price').value),
+                count: countVal,
                 img: document.getElementById('ap-img').value,
                 cat: document.getElementById('ap-cat').value,
                 desc: document.getElementById('ap-desc').value
             };
-            if(!data.name || !data.price) return tg.showAlert("Nomi va narxini kiriting");
+            if(!data.name || !data.price) return tg.showAlert("Ma'lumot to'liq emas");
 
             if(id) await updateDoc(doc(db, "products", id), data);
             else await addDoc(collection(db, "products"), data);
             
-            tg.showAlert("Muvaffaqiyatli saqlandi!");
-            resetAdminForm();
-            openAdminView('admin-prods');
+            tg.showAlert("Saqlandi!"); resetAdminForm(); openAdminView('admin-prods');
         };
 
         window.editProduct = (id) => {
-            let p = products.find(x => x.id === id);
-            if(!p) return;
+            let p = products.find(x => x.id === id); if(!p) return;
             document.getElementById('ap-id').value = p.id;
             document.getElementById('ap-name').value = p.name;
             document.getElementById('ap-price').value = p.price;
+            document.getElementById('ap-count').value = p.count || '#';
             document.getElementById('ap-img').value = p.img;
             document.getElementById('ap-cat').value = p.cat;
             document.getElementById('ap-desc').value = p.desc || "";
@@ -834,86 +830,68 @@
         };
 
         window.resetAdminForm = () => {
-            document.getElementById('ap-id').value = "";
-            document.getElementById('ap-name').value = "";
-            document.getElementById('ap-price').value = "";
-            document.getElementById('ap-img').value = "";
-            document.getElementById('ap-desc').value = "";
-            document.getElementById('form-title').innerText = "Yangi mahsulot";
-            openAdminView('admin-prods');
+            document.getElementById('ap-id').value = ""; document.getElementById('ap-name').value = "";
+            document.getElementById('ap-price').value = ""; document.getElementById('ap-count').value = "";
+            document.getElementById('ap-img').value = ""; document.getElementById('ap-desc').value = "";
+            document.getElementById('form-title').innerText = "Yangi mahsulot"; openAdminView('admin-prods');
         };
 
         window.askDelete = (id) => {
-            askConfirm("Mahsulot o'chirilsinmi?", "Bu amalni bekor qilib bo'lmaydi.", async () => {
-                await deleteDoc(doc(db, "products", id));
-                tg.showAlert("Mahsulot o'chirildi!");
+            askConfirm("O'chirish", "Haqiqatan ham o'chirasizmi?", async () => {
+                await deleteDoc(doc(db, "products", id)); tg.showAlert("O'chirildi!");
             });
         };
 
-        // Admin: Adminlar boshqaruvi
+        // Admin: Adminlar
         function renderAdminUsers() {
             const list = document.getElementById('admin-users-list');
             list.innerHTML = admins.map(a => `
-                <div class="list-card" style="padding:10px 15px;">
-                    <b>ID: ${a}</b>
-                    ${a !== "5630950142" ? `<button style="background:none; border:none; color:var(--red); font-size:20px; font-weight:bold; cursor:pointer;" onclick="removeAdmin('${a}')">✕</button>` : `<span style="color:var(--brand-green); font-size:12px;">Asosiy</span>`}
-                </div>
+                <div class="list-card" style="padding:10px 15px;"><b>ID: ${a}</b>
+                ${a !== "5630950142" ? `<button style="background:none; border:none; color:var(--red); font-size:20px; font-weight:bold;" onclick="removeAdmin('${a}')">✕</button>` : `<span style="color:var(--brand-green); font-size:12px;">Asosiy</span>`}</div>
             `).join('');
         }
-
         window.addAdmin = async () => {
             let id = document.getElementById('new-admin-id').value.trim();
-            if(!id) return;
-            if(admins.includes(id)) return tg.showAlert("Bu ID allaqachon admin!");
-            let newList = [...admins, id];
-            await setDoc(doc(db, "settings", "admins"), { list: newList });
-            document.getElementById('new-admin-id').value = "";
-            tg.showAlert("Yangi admin qo'shildi!");
+            if(!id || admins.includes(id)) return;
+            let newList = [...admins, id]; await setDoc(doc(db, "settings", "admins"), { list: newList });
+            document.getElementById('new-admin-id').value = ""; tg.showAlert("Qo'shildi!");
         };
-
         window.removeAdmin = async (id) => {
             let newList = admins.filter(a => a !== id);
             await setDoc(doc(db, "settings", "admins"), { list: newList });
         };
 
-        // ------------------ UI YORDAMCHI FUNKSIYALAR ------------------
-
+        // UI HELPERS
         window.switchTab = (tabId, el) => {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active');
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(tabId + '-view').classList.add('active');
-            
             document.getElementById('main-header').style.display = (tabId === 'menu') ? 'flex' : 'none';
-            
             if(tabId === 'cart') renderCart();
         };
 
         window.openProductModal = (id) => {
-            let p = products.find(x => x.id === id);
-            if(!p) return;
-            
+            let p = products.find(x => x.id === id); if(!p) return;
             document.getElementById('pm-img').src = p.img || 'https://via.placeholder.com/400';
             document.getElementById('pm-name').innerText = p.name;
             document.getElementById('pm-price').innerText = Number(p.price).toLocaleString() + " so'm";
-            document.getElementById('pm-desc').innerText = p.desc || "Ushbu mahsulot uchun tavsif kiritilmagan.";
+            document.getElementById('pm-desc').innerText = p.desc || "Tavsif yo'q.";
             
             const q = cart[p.id]?.qty || 0;
             const actionDiv = document.getElementById('pm-action');
-            
-            if(q > 0) {
+            let isOut = p.count !== '#' && Number(p.count || 0) <= 0;
+
+            if(isOut) {
+                actionDiv.innerHTML = `<span style="color:var(--red); font-weight:bold;">Tugagan</span>`;
+            } else if(q > 0) {
                 actionDiv.innerHTML = `<div class="counter" style="min-width:110px;"><button class="btn-m" onclick="updateCart('${p.id}',-1)">-</button><span>${q}</span><button class="btn-m" onclick="updateCart('${p.id}',1)">+</button></div>`;
             } else {
                 actionDiv.innerHTML = `<button class="main-btn" style="margin:0; padding:10px 20px; border-radius:10px;" onclick="updateCart('${p.id}',1)">Savatga</button>`;
             }
-            
             document.getElementById('product-modal').style.display = 'block';
         };
 
-        window.closeModal = (id) => {
-            document.getElementById(id).style.display = 'none';
-        };
-
+        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
     </script>
 </body>
 </html>
