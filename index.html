@@ -38,7 +38,7 @@
         .counter { display: flex; justify-content: space-between; align-items: center; background: var(--brand-green); color: white; border-radius: 10px; margin-top: auto; }
         .btn-m { background: none; border: none; color: white; font-size: 18px; padding: 8px 15px; font-weight: bold; cursor: pointer; }
 
-        /* LIST KARTALAR (Savat, Buyurtmalar) */
+        /* LIST KARTALAR */
         .list-card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer;}
         .list-info { display: flex; flex-direction: column; gap: 5px; }
 
@@ -90,6 +90,34 @@
         /* ADMIN PANEL CARDS */
         .admin-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .admin-card hr { border: none; border-top: 1px solid #eee; margin: 10px 0; }
+
+        /* KUN GURUHI — ADMIN ORDERS */
+        .day-group { margin-bottom: 10px; border-radius: 16px; overflow: hidden; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .day-group-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 15px; cursor: pointer;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .day-group-header .day-label { font-weight: 800; font-size: 15px; color: #2e7d32; }
+        .day-group-header .day-count { font-size: 12px; color: var(--gray); }
+        .day-group-header .day-delete-btn {
+            background: var(--red); color: white; border: none;
+            border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: bold; cursor: pointer;
+        }
+        .day-group-body { padding: 10px; display: none; }
+        .day-group-body.open { display: block; }
+
+        /* UMUMIY SUMMA BANNER */
+        .total-banner {
+            background: linear-gradient(135deg, var(--brand-green), #388e3c);
+            color: white; border-radius: 16px; padding: 18px; margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+        }
+        .total-banner .tb-label { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+        .total-banner .tb-amount { font-size: 26px; font-weight: 900; }
+        .total-banner .tb-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; opacity: 0.9; }
+        .total-banner .tb-divider { border: none; border-top: 1px solid rgba(255,255,255,0.3); margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -143,6 +171,7 @@
         <div class="nav-item" onclick="switchTab('profile', this)"><div class="icon">👤</div><b>Profil</b></div>
     </nav>
 
+    <!-- PRODUCT MODAL -->
     <div id="product-modal" class="full-modal">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('product-modal')">←</button>
@@ -162,6 +191,7 @@
         </div>
     </div>
 
+    <!-- ORDER DETAIL MODAL -->
     <div id="order-detail-modal" class="full-modal" style="z-index: 9999;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('order-detail-modal')">←</button>
@@ -170,6 +200,7 @@
         <div style="padding: 15px;" id="od-content"></div>
     </div>
 
+    <!-- PROFILE EDIT MODAL -->
     <div id="profile-edit-modal" class="full-modal" style="background: white;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('profile-edit-modal')">←</button>
@@ -186,6 +217,7 @@
         </div>
     </div>
 
+    <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="full-modal" style="background: white;">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('checkout-modal')">←</button>
@@ -202,6 +234,7 @@
         </div>
     </div>
 
+    <!-- ADMIN PANEL MODAL -->
     <div id="admin-panel-modal" class="full-modal">
         <div class="modal-header">
             <button class="back-btn" onclick="closeModal('admin-panel-modal')">←</button>
@@ -217,28 +250,46 @@
                 <div class="admin-card" style="text-align:center; cursor:pointer;" onclick="openAdminView('admin-settings')">⚙️ Sozlamalar</div>
             </div>
 
+            <!-- SOZLAMALAR -->
             <div id="admin-settings" class="admin-section" style="display:none;">
                 <h3>Umumiy Sozlamalar</h3>
                 <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Minimal buyurtma miqdori (so'm)</label>
                 <input type="number" id="as-min-order" class="input-style" placeholder="50000">
                 <label style="font-weight:bold; color:var(--gray); margin-top:10px; display:block;">Ustama narx (Xizmat haqi %)</label>
-                <input type="number" id="as-fee-percent" class="input-style" placeholder="1">
+                <input type="number" id="as-fee-percent" class="input-style" placeholder="3">
                 <button class="main-btn" onclick="saveGlobalSettings()">Saqlash</button>
             </div>
 
+            <!-- BUYURTMALAR (kun bo'yicha) -->
             <div id="admin-orders" class="admin-section">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0;">Kelib tushgan buyurtmalar</h3>
                     <button class="danger-btn" style="width: auto; padding: 8px 15px; margin: 0; font-size: 14px;" onclick="clearAllOrdersAdmin()">Tozalash</button>
                 </div>
+                <!-- UMUMIY SUMMA BANNER -->
+                <div class="total-banner" id="admin-total-banner" style="display:none;">
+                    <div class="tb-label">Umumiy tushum</div>
+                    <div class="tb-amount" id="admin-grand-total">0 so'm</div>
+                    <hr class="tb-divider">
+                    <div class="tb-row">
+                        <span>Katalog narxi:</span>
+                        <span id="admin-subtotal-total">0 so'm</span>
+                    </div>
+                    <div class="tb-row">
+                        <span id="admin-fee-label">Xizmat haqi (%):</span>
+                        <span id="admin-fee-total">0 so'm</span>
+                    </div>
+                </div>
                 <div id="admin-orders-list"></div>
             </div>
 
+            <!-- MAHSULOTLAR -->
             <div id="admin-prods" class="admin-section" style="display:none;">
                 <h3>Barcha mahsulotlar</h3>
                 <div id="admin-products-list"></div>
             </div>
 
+            <!-- MAHSULOT QO'SHISH/TAHRIRLASH -->
             <div id="admin-add-prod" class="admin-section" style="display:none;">
                 <h3 id="form-title">Yangi mahsulot</h3>
                 <input type="hidden" id="ap-id">
@@ -252,6 +303,7 @@
                 <button class="danger-btn" style="background:#8e8e93;" onclick="resetAdminForm()">Bekor qilish</button>
             </div>
 
+            <!-- KATEGORIYALAR -->
             <div id="admin-cats" class="admin-section" style="display:none;">
                 <h3>Kategoriyalarni boshqarish</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -261,6 +313,7 @@
                 <div id="admin-cats-list"></div>
             </div>
 
+            <!-- ADMINLAR -->
             <div id="admin-users" class="admin-section" style="display:none;">
                 <h3>Adminlar ro'yxati</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -273,6 +326,7 @@
         </div>
     </div>
 
+    <!-- CONFIRM MODAL -->
     <div id="confirm-modal" class="confirm-overlay">
         <div class="confirm-box">
             <h3 id="confirm-title" style="margin-top:0;">Sarlavha</h3>
@@ -286,7 +340,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, setDoc, getDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0ieeweZD3XoCCuJkGQRiJ86buVKchGpw",
@@ -316,7 +370,7 @@
         let currentCat = "Hammasi";
         let searchQuery = "";
         let userData = { phone: "", dob: "" };
-        let globalSettings = { minOrder: 0, feePercent: 0 };
+        let globalSettings = { minOrder: 0, feePercent: 3 };
 
         // CONFIRM MODAL
         let confirmAction = null;
@@ -336,12 +390,12 @@
 
         // FIREBASE ULANISHLARI
         
-        // Umumiy sozlamalar (Minimal narx va Ustama)
+        // Umumiy sozlamalar
         onSnapshot(doc(db, "settings", "general"), (docSnap) => {
             if (docSnap.exists()) {
                 globalSettings = docSnap.data();
             } else {
-                globalSettings = { minOrder: 50000, feePercent: 0 };
+                globalSettings = { minOrder: 50000, feePercent: 3 };
             }
             document.getElementById('as-min-order').value = globalSettings.minOrder;
             document.getElementById('as-fee-percent').value = globalSettings.feePercent;
@@ -433,14 +487,12 @@
                 <div class="product-card" style="${isOut ? 'opacity:0.6;' : ''}">
                     <img src="${p.img || 'https://via.placeholder.com/300'}" onclick="openProductModal('${p.id}')">
                     <div class="p-title">${p.name}</div>
-                    
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <div class="p-price">${Number(p.price).toLocaleString()} so'm</div>
                         <div class="p-stock" style="color:${isOut ? 'var(--red)' : 'var(--gray)'}">
                             ${isOut ? 'Tugagan' : (isInfinity ? '∞' : stockNum + ' ta')}
                         </div>
                     </div>
-
                     ${isOut 
                         ? `<button class="add-btn" disabled style="background:#ccc; color:#666;">Sotib bo'lingan</button>`
                         : (q > 0 
@@ -524,14 +576,12 @@
                     <span>Jami:</span>
                     <span>${finalTotal.toLocaleString()} so'm</span>
                 </div>
-                
                 ${!isMinMet ? `<p style="color:red; font-size:12px; text-align:center;">Minimal xarid: ${minOrder.toLocaleString()} so'm</p>` : ''}
-                
                 <button class="main-btn" style="margin:0;" onclick="openCheckout()" ${!isMinMet ? 'disabled' : ''}>Buyurtma berish</button>
             </div>`;
         };
 
-        // BUYURTMALAR
+        // BUYURTMALAR (MIJOZ)
         window.renderMyOrders = () => {
             const list = document.getElementById('my-orders-list');
             if(myOrders.length === 0) {
@@ -552,6 +602,9 @@
         window.openOrderDetails = (orderId) => {
             let o = allOrders.find(x => x.id === orderId);
             if(!o) return;
+            let feePercent = Number(o.feePercent || 0);
+            let subtotal = Number(o.subtotal || 0);
+            let feeAmount = Number(o.feeAmount || 0);
             let html = `
                 <div class="p-info-box">
                     <div class="p-row"><b>Buyurtma raqami:</b> <span>#${o.orderNum}</span></div>
@@ -567,7 +620,10 @@
                     ${o.items.map(i => `
                         <div class="p-row"><span>${i.name} (${i.qty}x)</span><span>${(i.price * i.qty).toLocaleString()} so'm</span></div>
                     `).join('')}
-                    <div class="p-row" style="border-top:2px solid #eee; margin-top:10px;">
+                    <hr style="border:none; border-top:1px solid #eee; margin: 5px 0;">
+                    ${subtotal > 0 ? `<div class="p-row" style="color:var(--gray); font-size:14px;"><span>Katalog narxi:</span><span>${subtotal.toLocaleString()} so'm</span></div>` : ''}
+                    ${feePercent > 0 ? `<div class="p-row" style="color:var(--gray); font-size:14px;"><span>Xizmat haqi (${feePercent}%):</span><span>+${feeAmount.toLocaleString()} so'm</span></div>` : ''}
+                    <div class="p-row" style="border-top:2px solid #eee; margin-top:5px;">
                         <b>Jami:</b> <span style="color:var(--brand-green); font-size:18px;">${Number(o.total).toLocaleString()} so'm</span>
                     </div>
                 </div>
@@ -591,12 +647,12 @@
                 btn.innerText = "⏳ Aniqlanmoqda..."; btn.disabled = true;
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        let link = `https://maps.google.com/maps?q=$${pos.coords.latitude},${pos.coords.longitude}`;
+                        let link = `https://maps.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
                         let el = document.getElementById('checkout-address');
                         el.value = (el.value ? el.value + "\n" : "") + "📍 GPS: " + link;
                         btn.innerText = "📍 Joylashuvni aniqlash"; btn.disabled = false;
                     },
-                    (err) => { tg.showAlert("Joylashuv aniqlanmadi"); btn.innerText = "📍 Joylashuvni aniqlash"; btn.disabled = false; },
+                    () => { tg.showAlert("Joylashuv aniqlanmadi"); btn.innerText = "📍 Joylashuvni aniqlash"; btn.disabled = false; },
                     { enableHighAccuracy: true }
                 );
             }
@@ -642,10 +698,8 @@
                     date: Date.now(), hideForUser: false
                 };
 
-                // Firebasega buyurtmani qo'shish
                 await addDoc(collection(db, "orders"), orderObj);
                 
-                // Ombordan ayirish
                 for(let item of items) {
                     let p = products.find(x => x.id === item.id);
                     if(p && (p.count || '#') !== '#') {
@@ -654,7 +708,6 @@
                     }
                 }
 
-                // Telegram Botga yuborish (Xabar berish uchun)
                 tg.sendData(JSON.stringify({ action: "new_order", ...orderObj }));
                 
                 cart = {}; renderMenu(); renderCart(); closeModal('checkout-modal');
@@ -752,24 +805,105 @@
             await setDoc(doc(db, "settings", "categories"), { list: catsOnly });
         };
 
-        // Admin: Buyurtmalar
-        function renderAdminOrders() {
-            const list = document.getElementById('admin-orders-list');
-            if(allOrders.length === 0) return list.innerHTML = "<p>Buyurtmalar yo'q.</p>";
-            list.innerHTML = allOrders.map(o => `
-                <div class="admin-card" onclick="openOrderDetails('${o.id}')" style="cursor:pointer; border-left:4px solid var(--brand-green);">
-                    <div style="display:flex; justify-content:space-between;"><b>#${o.orderNum}</b><span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleString()}</span></div>
-                    <div style="font-size:14px; margin-top:5px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
-                    <hr>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>${o.items.length} xil mahsulot</span><span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
-                    </div>
-                </div>
-            `).join('');
+        // ─────────────────────────────────────────────────────────────
+        // Admin: BUYURTMALAR — KUN BO'YICHA SARALASH
+        // ─────────────────────────────────────────────────────────────
+        function formatDate(ts) {
+            let d = new Date(ts);
+            let day   = String(d.getDate()).padStart(2, '0');
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let year  = d.getFullYear();
+            return `${day}/${month}/${year}`;
         }
+
+        function renderAdminOrders() {
+            const listEl = document.getElementById('admin-orders-list');
+            const bannerEl = document.getElementById('admin-total-banner');
+
+            if(allOrders.length === 0) {
+                listEl.innerHTML = "<p>Buyurtmalar yo'q.</p>";
+                bannerEl.style.display = 'none';
+                return;
+            }
+
+            // Umumiy hisob
+            let grandTotal   = allOrders.reduce((s, o) => s + Number(o.total || 0), 0);
+            let grandSubtotal= allOrders.reduce((s, o) => s + Number(o.subtotal || 0), 0);
+            let grandFee     = allOrders.reduce((s, o) => s + Number(o.feeAmount || 0), 0);
+            let feePercent   = Number(globalSettings.feePercent || 0);
+
+            bannerEl.style.display = 'block';
+            document.getElementById('admin-grand-total').innerText   = grandTotal.toLocaleString() + " so'm";
+            document.getElementById('admin-subtotal-total').innerText = grandSubtotal.toLocaleString() + " so'm";
+            document.getElementById('admin-fee-total').innerText      = grandFee.toLocaleString() + " so'm";
+            document.getElementById('admin-fee-label').innerText      = `Xizmat haqi (${feePercent}%):`;
+
+            // Kunlarga guruhlash
+            let groups = {};
+            allOrders.forEach(o => {
+                let key = formatDate(o.date);
+                if(!groups[key]) groups[key] = [];
+                groups[key].push(o);
+            });
+
+            let html = '';
+            Object.entries(groups).forEach(([date, orders]) => {
+                let dayTotal = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+                let groupId = 'dg-' + date.replace(/\//g, '-');
+                html += `
+                <div class="day-group" id="${groupId}">
+                    <div class="day-group-header" onclick="toggleDayGroup('${groupId}')">
+                        <div>
+                            <div class="day-label">📅 ${date}</div>
+                            <div class="day-count">${orders.length} ta buyurtma · ${dayTotal.toLocaleString()} so'm</div>
+                        </div>
+                        <button class="day-delete-btn" onclick="event.stopPropagation(); deleteDayOrders('${date}')">🗑 O'chirish</button>
+                    </div>
+                    <div class="day-group-body" id="${groupId}-body">
+                        ${orders.map(o => `
+                            <div class="admin-card" onclick="openOrderDetails('${o.id}')" style="cursor:pointer; border-left:4px solid var(--brand-green); margin-bottom:10px;">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <b>#${o.orderNum}</b>
+                                    <span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'})}</span>
+                                </div>
+                                <div style="font-size:14px; margin-top:5px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
+                                <hr>
+                                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                                    <span>${o.items.length} xil mahsulot</span>
+                                    <span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        // Kun guruhini ochish/yopish
+        window.toggleDayGroup = (groupId) => {
+            let body = document.getElementById(groupId + '-body');
+            if(body) body.classList.toggle('open');
+        };
+
+        // Kun buyurtmalarini o'chirish
+        window.deleteDayOrders = (dateStr) => {
+            let dayOrders = allOrders.filter(o => formatDate(o.date) === dateStr);
+            if(dayOrders.length === 0) return;
+            askConfirm(
+                `${dateStr} kunini o'chirish`,
+                `${dayOrders.length} ta buyurtma o'chiriladi. Davom etasizmi?`,
+                async () => {
+                    for(let o of dayOrders) await deleteDoc(doc(db, "orders", o.id));
+                    tg.showAlert("O'chirildi.");
+                }
+            );
+        };
+
         window.clearAllOrdersAdmin = () => {
             if(allOrders.length === 0) return;
-            askConfirm("Barchasini o'chirish", "O'chirasizmi?", async () => {
+            askConfirm("Barchasini o'chirish", "Barcha buyurtmalar o'chiriladi. Davom etasizmi?", async () => {
                 for(let o of allOrders) await deleteDoc(doc(db, "orders", o.id));
                 tg.showAlert("O'chirildi.");
             });
