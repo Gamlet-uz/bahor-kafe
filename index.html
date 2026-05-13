@@ -88,7 +88,7 @@
         .btn-no { background: var(--brand-green); }
 
         /* ADMIN PANEL CARDS */
-        .admin-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .admin-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .admin-card hr { border: none; border-top: 1px solid #eee; margin: 10px 0; }
 
         /* KUN GURUHI — ADMIN ORDERS */
@@ -108,16 +108,31 @@
         .day-group-body { padding: 10px; display: none; }
         .day-group-body.open { display: block; }
 
-        /* UMUMIY SUMMA BANNER */
-        .total-banner {
+        /* KUN ICHIDAGI BANNER */
+        .day-banner {
             background: linear-gradient(135deg, var(--brand-green), #388e3c);
-            color: white; border-radius: 16px; padding: 18px; margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+            color: white; border-radius: 12px; padding: 14px 15px; margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(76,175,80,0.25);
         }
-        .total-banner .tb-label { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
-        .total-banner .tb-amount { font-size: 26px; font-weight: 900; }
-        .total-banner .tb-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; opacity: 0.9; }
-        .total-banner .tb-divider { border: none; border-top: 1px solid rgba(255,255,255,0.3); margin: 10px 0; }
+        .day-banner .db-title { font-size: 12px; opacity: 0.85; margin-bottom: 4px; }
+        .day-banner .db-total { font-size: 22px; font-weight: 900; }
+        .day-banner .db-row { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.9; margin-top: 6px; }
+        .day-banner .db-divider { border: none; border-top: 1px solid rgba(255,255,255,0.3); margin: 8px 0; }
+
+        /* BUYURTMA STATUS BADGE */
+        .status-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: bold;
+        }
+        .status-pending  { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-rejected  { background: #f8d7da; color: #721c24; }
+
+        /* ADMIN TASDIQLASH TUGMALARI */
+        .order-action-btns { display: flex; gap: 8px; margin-top: 10px; }
+        .order-action-btns button { flex: 1; padding: 9px; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-confirm { background: var(--brand-green); color: white; }
+        .btn-reject  { background: var(--red); color: white; }
     </style>
 </head>
 <body>
@@ -225,11 +240,9 @@
         </div>
         <div style="padding: 20px;">
             <h2 style="text-align:center; margin-top:0;">Umumiy narx: <br><span id="checkout-total" style="color:var(--brand-green);">0 so'm</span></h2>
-            
             <label style="font-weight:bold; color:var(--gray); margin-top:20px; display:block;">Buyurtma olib ketish joyi (Manzil):</label>
             <button id="btn-location" class="main-btn" style="background:#e0e0e0; color:#333; padding:12px; margin: 10px 0; font-size: 15px;" onclick="getLocation()">📍 Joylashuvimni aniqlash (GPS)</button>
             <textarea id="checkout-address" class="input-style" placeholder="Shahar, ko'cha, uy raqami yoki mo'ljal..."></textarea>
-            
             <button id="btn-submit-order" class="main-btn" onclick="submitOrder()">Tasdiqlash va Yuborish</button>
         </div>
     </div>
@@ -265,20 +278,6 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0;">Kelib tushgan buyurtmalar</h3>
                     <button class="danger-btn" style="width: auto; padding: 8px 15px; margin: 0; font-size: 14px;" onclick="clearAllOrdersAdmin()">Tozalash</button>
-                </div>
-                <!-- UMUMIY SUMMA BANNER -->
-                <div class="total-banner" id="admin-total-banner" style="display:none;">
-                    <div class="tb-label">Umumiy tushum</div>
-                    <div class="tb-amount" id="admin-grand-total">0 so'm</div>
-                    <hr class="tb-divider">
-                    <div class="tb-row">
-                        <span>Katalog narxi:</span>
-                        <span id="admin-subtotal-total">0 so'm</span>
-                    </div>
-                    <div class="tb-row">
-                        <span id="admin-fee-label">Xizmat haqi (%):</span>
-                        <span id="admin-fee-total">0 so'm</span>
-                    </div>
                 </div>
                 <div id="admin-orders-list"></div>
             </div>
@@ -389,7 +388,7 @@
         };
 
         // FIREBASE ULANISHLARI
-        
+
         // Umumiy sozlamalar
         onSnapshot(doc(db, "settings", "general"), (docSnap) => {
             if (docSnap.exists()) {
@@ -544,7 +543,6 @@
             let feePercent = Number(globalSettings.feePercent || 0);
             let feeAmount = Math.round(subtotal * (feePercent / 100));
             let finalTotal = subtotal + feeAmount;
-            
             let minOrder = Number(globalSettings.minOrder || 0);
             let isMinMet = finalTotal >= minOrder;
             
@@ -581,7 +579,14 @@
             </div>`;
         };
 
-        // BUYURTMALAR (MIJOZ)
+        // ── STATUS HELPER ──────────────────────────────────────────────
+        function statusBadge(status) {
+            if (status === 'confirmed') return `<span class="status-badge status-confirmed">✅ Qabul qilindi</span>`;
+            if (status === 'rejected')  return `<span class="status-badge status-rejected">❌ Rad etildi</span>`;
+            return `<span class="status-badge status-pending">⏳ Kutilmoqda</span>`;
+        }
+
+        // BUYURTMALAR (MIJOZ) — status ko'rsatiladi
         window.renderMyOrders = () => {
             const list = document.getElementById('my-orders-list');
             if(myOrders.length === 0) {
@@ -593,6 +598,7 @@
                     <div class="list-info">
                         <b style="font-size:16px;">Buyurtma #${o.orderNum}</b>
                         <span style="color:var(--gray); font-size:13px;">${new Date(o.date).toLocaleString()}</span>
+                        ${statusBadge(o.status)}
                     </div>
                     <div style="font-weight:800; color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</div>
                 </div>
@@ -605,9 +611,11 @@
             let feePercent = Number(o.feePercent || 0);
             let subtotal = Number(o.subtotal || 0);
             let feeAmount = Number(o.feeAmount || 0);
+            let isAdmin = admins.includes(userId);
             let html = `
                 <div class="p-info-box">
                     <div class="p-row"><b>Buyurtma raqami:</b> <span>#${o.orderNum}</span></div>
+                    <div class="p-row"><b>Holati:</b> <span>${statusBadge(o.status)}</span></div>
                     <div class="p-row"><b>Vaqti:</b> <span>${new Date(o.date).toLocaleString()}</span></div>
                     <div class="p-row"><b>Manzil:</b> <span>${o.address}</span></div>
                     ${o.userId !== userId ? `
@@ -627,9 +635,25 @@
                         <b>Jami:</b> <span style="color:var(--brand-green); font-size:18px;">${Number(o.total).toLocaleString()} so'm</span>
                     </div>
                 </div>
+                ${isAdmin && (!o.status || o.status === 'pending') ? `
+                <div class="order-action-btns">
+                    <button class="btn-confirm" onclick="setOrderStatus('${o.id}', 'confirmed')">✅ Tasdiqlash</button>
+                    <button class="btn-reject"  onclick="setOrderStatus('${o.id}', 'rejected')">❌ Rad etish</button>
+                </div>` : ''}
             `;
             document.getElementById('od-content').innerHTML = html;
             document.getElementById('order-detail-modal').style.display = 'block';
+        };
+
+        // Admin: buyurtma statusini o'zgartirish
+        window.setOrderStatus = async (orderId, status) => {
+            try {
+                await updateDoc(doc(db, "orders", orderId), { status });
+                closeModal('order-detail-modal');
+                tg.showAlert(status === 'confirmed' ? "✅ Buyurtma tasdiqlandi!" : "❌ Buyurtma rad etildi.");
+            } catch(e) {
+                tg.showAlert("Xatolik yuz berdi.");
+            }
         };
 
         window.clearMyOrders = () => {
@@ -665,11 +689,9 @@
                 switchTab('profile', document.querySelectorAll('.nav-item')[3]);
                 openProfileEdit(); return;
             }
-
             let subtotal = Object.values(cart).reduce((a, b) => a + (b.price * b.qty), 0);
             let feeAmount = Math.round(subtotal * (Number(globalSettings.feePercent || 0) / 100));
             let total = subtotal + feeAmount;
-
             document.getElementById('checkout-address').value = ""; 
             document.getElementById('checkout-total').innerText = total.toLocaleString() + " so'm";
             document.getElementById('checkout-modal').style.display = 'block';
@@ -678,28 +700,23 @@
         window.submitOrder = async () => {
             let address = document.getElementById('checkout-address').value.trim();
             if(!address) return tg.showAlert("Manzilni kiriting!");
-            
             let btn = document.getElementById('btn-submit-order');
             btn.disabled = true; btn.innerText = "⏳ Yuborilmoqda...";
-            
             try {
                 let items = Object.values(cart).map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price }));
                 let subtotal = items.reduce((a, b) => a + (b.price * b.qty), 0);
                 let feePercent = Number(globalSettings.feePercent || 0);
                 let feeAmount = Math.round(subtotal * (feePercent / 100));
                 let total = subtotal + feeAmount;
-                
                 let orderNum = Math.floor(10000 + Math.random() * 90000); 
-                
                 let orderObj = {
                     orderNum, userId, userName,
                     phone: userData.phone, address, items, total,
                     feePercent, feeAmount, subtotal,
-                    date: Date.now(), hideForUser: false
+                    date: Date.now(), hideForUser: false,
+                    status: "pending"
                 };
-
                 await addDoc(collection(db, "orders"), orderObj);
-                
                 for(let item of items) {
                     let p = products.find(x => x.id === item.id);
                     if(p && (p.count || '#') !== '#') {
@@ -707,9 +724,7 @@
                         await updateDoc(doc(db, "products", p.id), { count: newCount.toString() });
                     }
                 }
-
                 tg.sendData(JSON.stringify({ action: "new_order", ...orderObj }));
-                
                 cart = {}; renderMenu(); renderCart(); closeModal('checkout-modal');
                 switchTab('orders', document.querySelectorAll('.nav-item')[2]);
                 tg.showAlert("Qabul qilindi! Raqam: #" + orderNum);
@@ -762,12 +777,10 @@
             if(admins.includes(userId)) document.getElementById('btn-admin-panel').style.display = 'block';
             else document.getElementById('btn-admin-panel').style.display = 'none';
         }
-
         window.openAdminPanel = () => {
             document.getElementById('admin-panel-modal').style.display = 'block';
             openAdminView('admin-orders');
         };
-
         window.openAdminView = (id) => {
             document.querySelectorAll('.admin-section').forEach(el => el.style.display = 'none');
             document.getElementById(id).style.display = 'block';
@@ -806,7 +819,7 @@
         };
 
         // ─────────────────────────────────────────────────────────────
-        // Admin: BUYURTMALAR — KUN BO'YICHA SARALASH
+        // Admin: BUYURTMALAR — KUN BO'YICHA SARALASH + BANNER KUN ICHIDA
         // ─────────────────────────────────────────────────────────────
         function formatDate(ts) {
             let d = new Date(ts);
@@ -818,25 +831,10 @@
 
         function renderAdminOrders() {
             const listEl = document.getElementById('admin-orders-list');
-            const bannerEl = document.getElementById('admin-total-banner');
-
             if(allOrders.length === 0) {
                 listEl.innerHTML = "<p>Buyurtmalar yo'q.</p>";
-                bannerEl.style.display = 'none';
                 return;
             }
-
-            // Umumiy hisob
-            let grandTotal   = allOrders.reduce((s, o) => s + Number(o.total || 0), 0);
-            let grandSubtotal= allOrders.reduce((s, o) => s + Number(o.subtotal || 0), 0);
-            let grandFee     = allOrders.reduce((s, o) => s + Number(o.feeAmount || 0), 0);
-            let feePercent   = Number(globalSettings.feePercent || 0);
-
-            bannerEl.style.display = 'block';
-            document.getElementById('admin-grand-total').innerText   = grandTotal.toLocaleString() + " so'm";
-            document.getElementById('admin-subtotal-total').innerText = grandSubtotal.toLocaleString() + " so'm";
-            document.getElementById('admin-fee-total').innerText      = grandFee.toLocaleString() + " so'm";
-            document.getElementById('admin-fee-label').innerText      = `Xizmat haqi (${feePercent}%):`;
 
             // Kunlarga guruhlash
             let groups = {};
@@ -846,10 +844,15 @@
                 groups[key].push(o);
             });
 
+            let feePercent = Number(globalSettings.feePercent || 0);
             let html = '';
+
             Object.entries(groups).forEach(([date, orders]) => {
-                let dayTotal = orders.reduce((s, o) => s + Number(o.total || 0), 0);
-                let groupId = 'dg-' + date.replace(/\//g, '-');
+                let dayTotal    = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+                let daySubtotal = orders.reduce((s, o) => s + Number(o.subtotal || 0), 0);
+                let dayFee      = orders.reduce((s, o) => s + Number(o.feeAmount || 0), 0);
+                let groupId     = 'dg-' + date.replace(/\//g, '-');
+
                 html += `
                 <div class="day-group" id="${groupId}">
                     <div class="day-group-header" onclick="toggleDayGroup('${groupId}')">
@@ -860,20 +863,48 @@
                         <button class="day-delete-btn" onclick="event.stopPropagation(); deleteDayOrders('${date}')">🗑 O'chirish</button>
                     </div>
                     <div class="day-group-body" id="${groupId}-body">
-                        ${orders.map(o => `
-                            <div class="admin-card" onclick="openOrderDetails('${o.id}')" style="cursor:pointer; border-left:4px solid var(--brand-green); margin-bottom:10px;">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <b>#${o.orderNum}</b>
-                                    <span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'})}</span>
-                                </div>
-                                <div style="font-size:14px; margin-top:5px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
-                                <hr>
-                                <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                                    <span>${o.items.length} xil mahsulot</span>
-                                    <span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
-                                </div>
+
+                        <!-- KUN BANNERI — faqat kun ochilganda ko'rinadi -->
+                        <div class="day-banner">
+                            <div class="db-title">Kun umumiy tushumi</div>
+                            <div class="db-total">${dayTotal.toLocaleString()} so'm</div>
+                            <hr class="db-divider">
+                            <div class="db-row">
+                                <span>Katalog narxi:</span>
+                                <span>${daySubtotal.toLocaleString()} so'm</span>
                             </div>
-                        `).join('')}
+                            <div class="db-row">
+                                <span>Xizmat haqi (${feePercent}%):</span>
+                                <span>${dayFee.toLocaleString()} so'm</span>
+                            </div>
+                        </div>
+
+                        ${orders.map(o => {
+                            let borderColor = o.status === 'confirmed' ? '#4CAF50'
+                                           : o.status === 'rejected'  ? '#ff3b30'
+                                           : '#aaa';
+                            return `
+                            <div class="admin-card" style="cursor:pointer; border-left:4px solid ${borderColor};">
+                                <div onclick="openOrderDetails('${o.id}')">
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <b>#${o.orderNum}</b>
+                                        <span style="color:var(--gray); font-size:12px;">${new Date(o.date).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'})}</span>
+                                    </div>
+                                    <div style="font-size:14px; margin-top:5px;">👤 ${o.userName} | 📞 +998 ${o.phone}</div>
+                                    <div style="margin-top:5px;">${statusBadge(o.status)}</div>
+                                    <hr>
+                                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                                        <span>${o.items.length} xil mahsulot</span>
+                                        <span style="color:var(--brand-green);">${Number(o.total).toLocaleString()} so'm</span>
+                                    </div>
+                                </div>
+                                ${(!o.status || o.status === 'pending') ? `
+                                <div class="order-action-btns">
+                                    <button class="btn-confirm" onclick="setOrderStatus('${o.id}', 'confirmed')">✅ Tasdiqlash</button>
+                                    <button class="btn-reject"  onclick="setOrderStatus('${o.id}', 'rejected')">❌ Rad etish</button>
+                                </div>` : ''}
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>`;
             });
@@ -943,10 +974,8 @@
                 desc: document.getElementById('ap-desc').value
             };
             if(!data.name || !data.price) return tg.showAlert("Ma'lumot to'liq emas");
-
             if(id) await updateDoc(doc(db, "products", id), data);
             else await addDoc(collection(db, "products"), data);
-            
             tg.showAlert("Saqlandi!"); resetAdminForm(); openAdminView('admin-prods');
         };
 
@@ -1010,11 +1039,9 @@
             document.getElementById('pm-name').innerText = p.name;
             document.getElementById('pm-price').innerText = Number(p.price).toLocaleString() + " so'm";
             document.getElementById('pm-desc').innerText = p.desc || "Tavsif yo'q.";
-            
             const q = cart[p.id]?.qty || 0;
             const actionDiv = document.getElementById('pm-action');
             let isOut = p.count !== '#' && Number(p.count || 0) <= 0;
-
             if(isOut) {
                 actionDiv.innerHTML = `<span style="color:var(--red); font-weight:bold;">Tugagan</span>`;
             } else if(q > 0) {
